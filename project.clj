@@ -1,4 +1,5 @@
  ; Copyright (C) 2014 Clark & Parsia
+ ; Copyright (C) 2014 Paul Gearon
  ;
  ; Licensed under the Apache License, Version 2.0 (the "License");
  ; you may not use this file except in compliance with the License.
@@ -18,17 +19,20 @@
   :license {:name "Apache License"
             :url "http://www.apache.org/licenses/LICENSE-2.0"}
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [com.complexible.stardog.protocols.snarl/client "2.1.2"]
                  [com.complexible.stardog/common-rdf "2.1.2"]
                  [com.complexible.stardog/openrdf-utils "2.1.2"]
                  [com.complexible.stardog/shared "2.1.2"]
                  [org.openrdf.sesame/sesame "2.7.7"]
-                 [com.complexible.stardog/api "2.1.2"]]
+                 [com.complexible.stardog/api "2.1.2"]
+                 [com.complexible.stardog.protocols.snarl/client "2.1.2"]
+                 [com.complexible.stardog.protocols.http/client "2.1.2"]
+                 [com.complexible.stardog.reasoning.snarl/client "2.1.2"]
+                 [com.complexible.stardog.reasoning.http/client "2.1.2"]
+                 [com.complexible.stardog.search.snarl/client "2.1.2"]
+                 [com.complexible.stardog.search.http/client "2.1.2"]
+                 [com.complexible.stardog.icv.snarl/client "2.1.2"]
+                 [com.complexible.stardog.icv.http/client "2.1.2"]]
   :plugins [[jonase/eastwood "0.0.2"]
             [lein-midje "3.1.3-RC2"]]
-  :profiles
-  {:dev
-   {:dependencies
-    [
-     [midje "1.6-beta1"]
-    ]}})
+  :profiles {:dev {:dependencies [[midje "1.5.1"]]
+                  :plugins [[lein-midje "3.1.3-RC2"]]}} )

@@ -2,23 +2,78 @@
 
 Stardog-clj bindings, providing an idiomatic clojure interface to the Stardog SNARL API.
 
+  `http://stardog.com/`
+
+This is still a work in progress.
 
 ## Usage
 
-The Stardog-clj bindings are similar to clojure.java.jdbc:
 
-    (def my-pool (make-datasource (create-db-spec "testdb" "snarl://localhost:5820/" "admin" "admin")))
+Out of the box, Stardog provides a Java API, SNARL, for communicating with the Stardog database.  SNARL is a connection oriented API, with both a connection and connection pool available, similar to JDBC.  Queries can be made using the SPARQL query language, or by using various SNARL APIs for navigating the structure of the data.
 
-    (query my-pool "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 2" {"s" (URIImpl. "urn:test2")} ))
 
-    (db-transact my-pool (fn [con] (... use SNARL API directly with a connection and tx ...)))
+Query Execution:
 
-    (with-database [con my-pool]
-         (.... con, but no tx))
+```
+=> (use 'stardog.core)
+=> (def c (connect {:db "my-database" :server "snarl://localhost"}))
+=> (def results (query c "select ?n { .... }"))
+=> (take 5 results)
+({:n #<StardogURI http://mulgara.org/math#2>} {:n #<StardogURI http://mulgara.org/math#3>} {:n #<StardogURI http://mulgara.org/math#5>} {:n #<StardogURI http://mulgara.org/math#7>} {:n #<StardogURI http://mulgara.org/math#11>})
+
+=> (def string-results (query c "select ?n { .... }" {:converter str}))
+=> (take 5 string-results)
+({:n "http://mulgara.org/math#2"} {:n "http://mulgara.org/math#3"} {:n "http://mulgara.org/math#5"} {:n "http://mulgara.org/math#7"} {:n "http://mulgara.org/math#11"})
+```
+
+Insert triples:
+```
+(with-open [c (connect {:db "my-database" :server "snarl://localhost"})]
+  (with-transaction [c]
+    (insert! c ["urn:a:subject" "urn:a:predicate" "an object"])
+```
+
+There are wrappers for:
+ * connect
+ * query
+ * update
+ * ask
+ * graph
+ * adder
+
+Most query options are available for configuring as keys in the parameter map. When requesting
+reasoners, use strings or keywords.
+
+### Query Results
+
+Results from SPARQL queries are lazy sequences of bindings from variable names to values.
+By default, variable names are converted to keywords, and values are left untouched. This can
+be changed by providing functions for the :key-converter and :converter parameters.
+
+Graph results are the same as query results, with namespaces attached as metadata on the entire
+sequence (not on sub-sequences).
+
+### Transactions
+
+While there are no update api wrappers yet, there is a macro for dealing with transactions:
+
+```
+(with-open [c (connect {:db "my-database" :server "snarl://localhost"})]
+  (with-transaction [c]
+    (.. c
+        (add)
+        (io)
+        (format RDFFormat/N3)
+        (stream (input-stream "data.n3")))))
+```
+
+Note: the with-open macro closes a connection, which is not recommended for using the Stardog connection pool.  IN lieu of with-open, there is a with-connection-pool macro available, that provides appropriate connection pool resource handling.
+
 
 ## License
 
 Copyright 2014 Clark & Parsia
+Copyright 2014 Paul Gearon
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
