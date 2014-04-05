@@ -1,10 +1,12 @@
 # stardog-clj
 
-Stardog-clj bindings, providing an idiomatic clojure interface to the Stardog SNARL API.
+Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+_Current Version **0.1.0**_
 
-  `http://stardog.com/`
+Stardog-clj - Clojure language bindings to use to develop apps with the [Stardog Graph / RDF Database](http://stardog.com).
 
-This is still a work in progress.
+![Stardog](http://docs.stardog.com/img/sd.png)
+
 
 ## Usage
 
@@ -73,6 +75,7 @@ Note: the with-open macro closes a connection, which is not recommended for usin
 ## License
 
 Copyright 2014 Clark & Parsia
+
 Copyright 2014 Paul Gearon
 
 Licensed under the Apache License, Version 2.0 (the "License");
