@@ -52,10 +52,28 @@
          (fact "query results should have 5 elements"
                (count r) => 5)))
 
-(facts "About inserting triples"
+(facts "About add and remove triples"
        (fact "Insert a vector representing a triple"
              (let [c (connect test-db-spec)]
-               (with-transaction [c] (insert! c ["urn:test" "urn:test:clj:prop" "Hello World"]))) => nil))
+               (with-transaction [c] (insert! c ["urn:test" "urn:test:clj:prop" "Hello World"]))) => nil)
+        (fact "Insert a vector representing a triple"
+             (let [c (connect test-db-spec)]
+               (with-transaction [c] (remove! c ["urn:test" "urn:test:clj:prop" "Hello World"]))) => nil)
+        (fact "Attempting to insert a partial statement throws IllegalArgumentException"
+               (let [c (connect test-db-spec)]
+               (with-transaction [c] (insert! c ["urn:test" "urn:test:clj:prop"]))) => (throws IllegalArgumentException))
+        (fact "Multiple inserts in a tx"
+               (let [c (connect test-db-spec)]
+               (with-transaction [c]
+                 (insert! c ["urn:test" "urn:test:clj:prop2" "Hello World"])
+                 (insert! c ["urn:test" "urn:test:clj:prop2" "Hello World2"]))
+               (count (query c "select ?s ?p ?o WHERE { ?s <urn:test:clj:prop2> ?o } LIMIT 5")) => 2) )
+       (fact "Multiple inserts in a tx"
+               (let [c (connect test-db-spec)]
+               (with-transaction [c]
+                 (remove! c ["urn:test" "urn:test:clj:prop2" "Hello World"])
+                 (remove! c ["urn:test" "urn:test:clj:prop2" "Hello World2"]))
+               (count (query c "select ?s ?p ?o WHERE { ?s <urn:test:clj:prop2> ?o } LIMIT 5")) => 0) ))
 
 
 

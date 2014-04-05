@@ -256,16 +256,26 @@
   (execute* q (convert-to-map args)))
 
 
-
-
 (defn insert!
-  "Inserts a list of statements"
+  "Inserts a statement (subject, predicate, object) represented as a 3 item vector"
   [^Connection connection triple-list]
+  (when (< (count triple-list) 3) (throw (IllegalArgumentException. "triple-list must have 3 elements")))
   (let [adder (.add connection)
-        subj (-> (first triple-list) (values/as-uri) (values/convert) )
-        pred (-> (second triple-list) (values/as-uri) (values/convert))
-        obj  (-> (nth triple-list 2) (values/convert))]
-    (.statement adder (StatementImpl. subj pred obj))))
+          subj (-> (first triple-list) (values/as-uri) (values/convert) )
+          pred (-> (second triple-list) (values/as-uri) (values/convert))
+          obj  (-> (nth triple-list 2) (values/convert))]
+      (.statement adder (StatementImpl. subj pred obj))))
+
+(defn remove!
+  "Removes a statements (subject, predicate, object) represented as a 3 item vector"
+  [^Connection connection triple-list]
+  (when (< (count triple-list) 3) (throw (IllegalArgumentException. "triple-list must have 3 elements")))
+  (let [remover (.remove connection)
+          subj (-> (first triple-list) (values/as-uri) (values/convert) )
+          pred (-> (second triple-list) (values/as-uri) (values/convert))
+          obj  (-> (nth triple-list 2) (values/convert))]
+      (.statement remover (StatementImpl. subj pred obj))))
+
 
 (defn transact
   "(transact pool (something con ..))
