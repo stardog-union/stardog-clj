@@ -14,7 +14,7 @@ Stardog-clj - Clojure language bindings to use to develop apps with the [Stardog
 Out of the box, Stardog provides a Java API, SNARL, for communicating with the Stardog database.  SNARL is a connection oriented API, with both a connection and connection pool available, similar to JDBC.  Queries can be made using the SPARQL query language, or by using various SNARL APIs for navigating the structure of the data. Stardog-clj provides APIs to do all of these functions using idiomatic clojure style of programming.  The API builds upon itself, being able to wrap usage with connection pools, create connections directly, etc.
 
 
-Query Execution:
+### Query Execution
 
 ```
 => (use 'stardog.core)
@@ -28,7 +28,7 @@ Query Execution:
 ({:n "http://mulgara.org/math#2"} {:n "http://mulgara.org/math#3"} {:n "http://mulgara.org/math#5"} {:n "http://mulgara.org/math#7"} {:n "http://mulgara.org/math#11"})
 ```
 
-Insert triples:
+### Insert triples
 ```
 (with-open [c (connect {:db "my-database" :server "snarl://localhost"})]
   (with-transaction [c]
@@ -70,6 +70,17 @@ While there are no update api wrappers yet, there is a macro for dealing with tr
 ```
 
 Note: the with-open macro closes a connection, which is not recommended for using the Stardog connection pool.  In lieu of with-open, there is a with-connection-pool macro available, that provides appropriate connection pool resource handling.
+
+## Building
+
+To build stardog-clj, you must perform the following steps:
+
+1. Download stardog from [Stardog.com](http://www.stardog.com)
+2. Run "mavenInstall" from the stardog-2.1.2/bin folder
+3. Run "stardog-admin server start"
+4. Run "stardog-admin db create -n testdb data/University0_0.owl"
+5. You can now run lein compile, use the lein repl, and run lein midje to perform the tests
+
 
 
 ## License
