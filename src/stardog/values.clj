@@ -27,26 +27,28 @@
 
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#integer"
   [^Literal v] (.intValue v))
+(defmethod typed-value "http://www.w3.org/2001/XMLSchema#int"
+  [^Literal v] (.intValue v))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#boolean"
   [^Literal v] (.booleanValue v))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#byte"
   [^Literal v] (.byteValue v))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#dateTime"
-  [^Literal v] (.calendarValue v))
+  [^Literal v] (-> (.calendarValue v) (.toGregorianCalendar) (.getTime)))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#time"
-  [^Literal v] (.calendarValue v))
+  [^Literal v] (-> (.calendarValue v) (.toGregorianCalendar) (.getTime)))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#date"
-  [^Literal v] (.calendarValue v))
+  [^Literal v] (-> (.calendarValue v) (.toGregorianCalendar) (.getTime)))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#gYearMonth"
-  [^Literal v] (.calendarValue v))
+  [^Literal v] (-> (.calendarValue v) (.toGregorianCalendar) (.getTime)))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#gMonthYear"
-  [^Literal v] (.calendarValue v))
+  [^Literal v] (-> (.calendarValue v) (.toGregorianCalendar) (.getTime)))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#gYear"
-  [^Literal v] (.calendarValue v))
+  [^Literal v] (-> (.calendarValue v) (.toGregorianCalendar) (.getTime)))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#gMonth"
-  [^Literal v] (.calendarValue v))
+  [^Literal v] (-> (.calendarValue v) (.toGregorianCalendar) (.getTime)))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#gDay"
-  [^Literal v] (.calendarValue v))
+  [^Literal v] (-> (.calendarValue v) (.toGregorianCalendar) (.getTime)))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#decimal"
   [^Literal v] (.decimalValue v))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#double"
@@ -77,7 +79,7 @@
   (convert [v] (let [g (GregorianCalendar. )
                      _ (.setTime g v)
                      x (-> (DatatypeFactory/newInstance)
-                           (.newXmlGregorianCalendar g))]
+                           (.newXMLGregorianCalendar g))]
                  (CalendarLiteralImpl. x)))
   java.net.URI
   (convert [v] (URIImpl. (.toString v)))
@@ -98,7 +100,8 @@
   (standardize [v] (keyword "_" (str "b" (.getID v)))))
 
 (defn as-uri
-  "Create a URI"
+  "Create a URI from a String"
+  ^String
   [input]
   (java.net.URI. input))
 

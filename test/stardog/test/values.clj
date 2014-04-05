@@ -26,16 +26,26 @@
                                DatatypeFactory
                                XMLGregorianCalendar ]))
 
-(facts "Converting from Clojure data structures to RDF"
-       (fact "Converting a URI"
+(facts "Converting from Clojure data structures to/from RDF"
+       (fact "Converting a URI to a URI Impl"
              (type (convert (java.net.URI. "http://test.com"))) => URIImpl )
+       (fact "Converting a URI to a URI Impl isomorphic with standardize"
+             (standardize (convert (java.net.URI. "http://test.com"))) => (as-uri "http://test.com") )
        (fact "Converting an Integer"
              (type (convert (Integer. 1))) => NumericLiteralImpl)
+       (fact "Converting an Integer isomorphic with standardize"
+             (standardize (convert (Integer. 1))) => (Integer. 1))
        (fact "Converting a String"
              (type (convert "test")) => LiteralImpl)
        (fact "Converting a java.util.Date"
-             (type (convert (Date. ))) => CalendarLiteralImpl))
+             (type (convert (Date. ))) => CalendarLiteralImpl)
+       (fact "LiteralImpl to String"
+             (standardize (convert "test")) => "test")
+       (fact "CalendarImpl to java.util.Date"
+             (let [d (Date. )]
+             (standardize (convert d)) => d)))
 
 (facts "URI Creation"
        (fact "Creating a URI from a String"
              (as-uri "http://test.com") => (java.net.URI. "http://test.com")))
+

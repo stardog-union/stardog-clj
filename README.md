@@ -11,7 +11,7 @@ Stardog-clj - Clojure language bindings to use to develop apps with the [Stardog
 ## Usage
 
 
-Out of the box, Stardog provides a Java API, SNARL, for communicating with the Stardog database.  SNARL is a connection oriented API, with both a connection and connection pool available, similar to JDBC.  Queries can be made using the SPARQL query language, or by using various SNARL APIs for navigating the structure of the data.
+Out of the box, Stardog provides a Java API, SNARL, for communicating with the Stardog database.  SNARL is a connection oriented API, with both a connection and connection pool available, similar to JDBC.  Queries can be made using the SPARQL query language, or by using various SNARL APIs for navigating the structure of the data. Stardog-clj provides APIs to do all of these functions using idiomatic clojure style of programming.  The API builds upon itself, being able to wrap usage with connection pools, create connections directly, etc.
 
 
 Query Execution:
@@ -69,7 +69,7 @@ While there are no update api wrappers yet, there is a macro for dealing with tr
         (stream (input-stream "data.n3")))))
 ```
 
-Note: the with-open macro closes a connection, which is not recommended for using the Stardog connection pool.  IN lieu of with-open, there is a with-connection-pool macro available, that provides appropriate connection pool resource handling.
+Note: the with-open macro closes a connection, which is not recommended for using the Stardog connection pool.  In lieu of with-open, there is a with-connection-pool macro available, that provides appropriate connection pool resource handling.
 
 
 ## License
