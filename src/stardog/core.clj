@@ -351,7 +351,7 @@
                    "with-connection-tx only allows Symbols in bindings"))))
 
 (defmacro with-connection-pool
-  "(with-pool [con pool] .. con, body ..)
+  "(with-connection-pool [con pool] .. con, body ..)
    Evaluates body in the context of an active connection"
   [bindings & body]
   (assert-args
