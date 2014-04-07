@@ -98,8 +98,9 @@
 ;; From http://stackoverflow.com/questions/9225948/how-do-turn-a-java-iterator-like-object-into-a-clojure-sequence
 ;; Leaving both as-seq and iteration->seq, lazy and not lazy respectively
 ;; until proper benchmarking can be done of the combination of Stardog result set processing and Clojure sequence APIs
-(defn as-seq [^Iteration i]
+(defn as-seq
   "Converts an Iteration into a lazy-seq"
+  [^Iteration i]
   (if-not (.hasNext i) nil (cons (.next i) (lazy-seq (as-seq i)))))
 
 (defn iteration->seq
