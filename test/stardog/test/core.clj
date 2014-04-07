@@ -76,4 +76,14 @@
                (count (query c "select ?s ?p ?o WHERE { ?s <urn:test:clj:prop2> ?o } LIMIT 5")) => 0) ))
 
 
+(facts "About query converter handling"
+       (fact "Convert keys to strings"
+             (let [c (connect test-db-spec)
+                   r (query c "select ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 5" {:key-converter #(.toString %)})]
+               (keys (first r))) => ["s" "p" "o"])
+       (fact "Convert values to strings"
+             (let [c (connect test-db-spec)
+                   r (query c "select ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 5" {:converter #(str "aaa" %)})]
+               (first (vals (first r)))) => (contains "aaa")))
+
 
