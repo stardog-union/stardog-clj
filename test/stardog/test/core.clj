@@ -29,6 +29,7 @@
 
 
 (def test-db-spec (create-db-spec "testdb" "snarl://localhost:5820/" "admin" "admin" "none"))
+(def reasoning-db-spec (create-db-spec "testdb" "snarl://localhost:5820/" "admin" "admin" "QL"))
 
 (facts "About stardog connection pool handling"
        (fact "create-db-spec returns a valid map"
@@ -85,5 +86,16 @@
              (let [c (connect test-db-spec)
                    r (query c "select ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 5" {:converter #(str "aaa" %)})]
                (first (vals (first r)))) => (contains "aaa")))
+
+(facts "About reasoning connections"
+       (fact "use reasoning on a connect"
+             (let [c (connect reasoning-db-spec)
+                   r (query c "select ?s ?p ?o WHERE { ?s a <http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#Person> }")]
+               (count r) => 719))
+       (fact "use reasoning on a connection pool"
+              (let [ds (make-datasource reasoning-db-spec)]
+                  (with-connection-pool [c ds]
+                   (let [r (query c "select ?s ?p ?o WHERE { ?s a <http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#Person> }")]
+                     (count r) => 719)))))
 
 

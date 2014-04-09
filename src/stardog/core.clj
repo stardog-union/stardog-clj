@@ -72,10 +72,11 @@
   "Creates a Stardog datasource, i.e. ConnectionPool"
   [db-spec]
   (let [{:keys [url user pass db
-                max-idle min-pool max-pool]} db-spec
+                max-idle min-pool max-pool reasoning]} db-spec
         con-config (-> (ConnectionConfiguration/to db )
                        (.server url)
                        (.credentials user pass)
+                       (.reasoning (reasoning-type reasoning))
                        )
         pool-config (-> (ConnectionPoolConfig/using con-config)
                         (.minPool min-pool)
