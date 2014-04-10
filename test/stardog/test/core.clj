@@ -99,3 +99,10 @@
                      (count r) => 719)))))
 
 
+(facts "About query limit handling"
+       (fact "Handle query limit"
+             (let [c (connect test-db-spec)
+                   r (query c "select ?s ?p ?o WHERE { ?s ?p ?o }" {:limit 5})]
+               (count r)) => 5))
+
+
