@@ -18,10 +18,11 @@
            [org.openrdf.model.impl CalendarLiteralImpl
                                    IntegerLiteralImpl
                                    LiteralImpl
+                                   BooleanLiteralImpl
                                    NumericLiteralImpl
                                    URIImpl]
-           [java.util Date GregorianCalendar]
-           [javax.xml.datatype DatatypeConfigurationException DatatypeFactory XMLGregorianCalendar ]))
+           [java.util Date GregorianCalendar UUID Map]
+           [javax.xml.datatype DatatypeConfigurationException DatatypeFactory XMLGregorianCalendar]))
 
 (defmulti typed-value (fn [^Literal v] (str (.getDatatype v))))
 
@@ -71,29 +72,78 @@
         {:datatype dt :value label}
         label))))
 
+(defprotocol URIType
+  (to-uri [u] "Converts to an internal URI type"))
+
+(extend-protocol URIType
+  nil
+  (to-uri [u] u)
+  String
+  (to-uri [u] (URIImpl. u))
+  java.net.URI
+  (to-uri [u] (URIImpl. (str u)))
+  java.net.URL
+  (to-uri [u] (URIImpl. (str u)))
+  org.openrdf.model.URI
+  (to-uri [u] u))
+
 (defprotocol RDFConverter
   (convert [v] "Converts standard Clojure types to corresponding literals"))
 
 (extend-protocol RDFConverter
+  nil
+  (convert [v] v)
   java.util.Date
-  (convert [v] (let [g (GregorianCalendar. )
-                     _ (.setTime g v)
-                     x (-> (DatatypeFactory/newInstance)
-                           (.newXMLGregorianCalendar g))]
-                 (CalendarLiteralImpl. x)))
+  (convert [v] (let [g (doto (GregorianCalendar.) (.setTime v))]
+                 (-> (DatatypeFactory/newInstance)
+                     (.newXMLGregorianCalendar g)
+                     (CalendarLiteralImpl.))))
+  GregorianCalendar
+  (convert [v] (-> (DatatypeFactory/newInstance)
+                   (.newXMLGregorianCalendar v)
+                   (CalendarLiteralImpl.)))
   java.net.URI
-  (convert [v] (URIImpl. (.toString v)))
+  (convert [v] (to-uri v))
+  java.net.URL
+  (convert [v] (to-uri v))
+  UUID
+  (convert [v] (to-uri (str "urn:uuid:" v)))
+  Boolean
+  (convert [v] (if v BooleanLiteralImpl/TRUE BooleanLiteralImpl/FALSE))
+  Byte
+  (convert [v] (NumericLiteralImpl. (byte v)))
+  Short
+  (convert [v] (NumericLiteralImpl. (short v)))
+  Float
+  (convert [v] (NumericLiteralImpl. (float v)))
+  Double
+  (convert [v] (NumericLiteralImpl. (double v)))
   Integer
-  (convert [v] (NumericLiteralImpl. v))
+  (convert [v] (NumericLiteralImpl. (int v)))
+  Long
+  (convert [v] (NumericLiteralImpl. (long v)))
+  BigInteger
+  (convert [v] (IntegerLiteralImpl. (biginteger v)))
+  BigDecimal
+  (convert [v] (NumericLiteralImpl. (bigdec v) (to-uri "http://www.w3.org/2001/XMLSchema#decimal")))
   String
-  (convert [v] (LiteralImpl. v)))
+  (convert [v] (LiteralImpl. v))
+  Map
+  (convert [{:keys [^String value ^String lang datatype]}]
+    (let [^org.openrdf.model.URI dt (to-uri datatype)]
+      (cond lang (LiteralImpl. value lang)
+            dt (LiteralImpl. value dt)
+            :default (LiteralImpl. value)))))
 
 (defprotocol ClojureConverter
   (standardize [v] "Standardizes a value into something Idiomatic for Clojure"))
 
 (extend-protocol ClojureConverter
   org.openrdf.model.URI
-  (standardize [v] (java.net.URI. (str v)))
+  (standardize [v] (let [u (str v)]
+                     (if (.startsWith u "urn:uuid:")
+                       (UUID/fromString (subs u 9))
+                       (java.net.URI. u))))
   Literal
   (standardize [v] (typed-value v))
   BNode
@@ -104,4 +154,3 @@
   ^String
   [input]
   (java.net.URI. input))
-

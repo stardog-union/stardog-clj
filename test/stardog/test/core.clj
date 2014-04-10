@@ -13,8 +13,8 @@
  ; limitations under the License.
 
 (ns stardog.test.core
-  (:use stardog.core
-        midje.sweet)
+  (:use [stardog.core]
+        [midje.sweet])
    (:import [com.complexible.stardog.api  Connection
                                           ConnectionPool
                                           ConnectionPoolConfig
