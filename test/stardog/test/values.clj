@@ -13,18 +13,18 @@
  ; limitations under the License.
 
 (ns stardog.test.values
-  (:use stardog.values
-        midje.sweet)
+  (:use [stardog.values]
+        [midje.sweet])
    (:import [org.openrdf.model URI Literal BNode Value]
-           [org.openrdf.model.impl CalendarLiteralImpl
-                                   IntegerLiteralImpl
-                                   LiteralImpl
-                                   NumericLiteralImpl
-                                   URIImpl]
-           [java.util Date GregorianCalendar]
-           [javax.xml.datatype DatatypeConfigurationException
-                               DatatypeFactory
-                               XMLGregorianCalendar ]))
+            [org.openrdf.model.impl CalendarLiteralImpl
+                                    IntegerLiteralImpl
+                                    LiteralImpl
+                                    NumericLiteralImpl
+                                    URIImpl]
+            [java.util Date GregorianCalendar UUID]
+            [javax.xml.datatype DatatypeConfigurationException
+                                DatatypeFactory
+                                XMLGregorianCalendar]))
 
 (facts "Converting from Clojure data structures to/from RDF"
        (fact "Converting a URI to a URI Impl"
@@ -38,12 +38,16 @@
        (fact "Converting a String"
              (type (convert "test")) => LiteralImpl)
        (fact "Converting a java.util.Date"
-             (type (convert (Date. ))) => CalendarLiteralImpl)
+             (type (convert (Date.))) => CalendarLiteralImpl)
        (fact "LiteralImpl to String"
              (standardize (convert "test")) => "test")
        (fact "CalendarImpl to java.util.Date"
-             (let [d (Date. )]
-             (standardize (convert d)) => d)))
+             (let [d (Date.)]
+             (standardize (convert d)) => d))
+       (fact "UUID to UUID"
+             (let [u (UUID/randomUUID)]
+             (standardize (convert u)) => u))
+       )
 
 (facts "URI Creation"
        (fact "Creating a URI from a String"
