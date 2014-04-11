@@ -78,7 +78,7 @@ To build stardog-clj, you must perform the following steps:
 1. Download stardog from [Stardog.com](http://www.stardog.com)
 2. Run "mavenInstall" from the stardog-2.1.2/bin folder
 3. Run "stardog-admin server start"
-4. Run "stardog-admin db create -n testdb data/University0_0.owl"
+4. Run "stardog-admin db create -n testdb path/to/data/University0_0.owl path/to/data/lubmSchema.owl"
 5. You can now run lein compile, use the lein repl, and run lein midje to perform the tests
 
 
