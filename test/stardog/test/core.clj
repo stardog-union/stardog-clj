@@ -105,4 +105,10 @@
                    r (query c "select ?s ?p ?o WHERE { ?s ?p ?o }" {:limit 5})]
                (count r)) => 5))
 
+(facts "About ask queries"
+       (fact "ask queries can use connections"
+             (let [c (connect test-db-spec)
+                   r (ask c "ask { ?s <http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#teacherOf> ?o }")]
+               r) => truthy))
+
 

@@ -134,7 +134,7 @@
   TupleQueryResult
   (clojure-data* [results keyfn valfn] (key-map-results keyfn valfn results))
   Boolean
-  (clojure-data* [results _ valfn] (valfn results)))
+  (clojure-data* [results _ valfn] results))
 
 (defn clojure-data
   "Converts query results into Clojure data. Optionally uses functions for interpreting
