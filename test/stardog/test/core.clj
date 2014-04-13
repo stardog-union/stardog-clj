@@ -30,6 +30,7 @@
 
 (def test-db-spec (create-db-spec "testdb" "snarl://localhost:5820/" "admin" "admin" "none"))
 (def reasoning-db-spec (create-db-spec "testdb" "snarl://localhost:5820/" "admin" "admin" "QL"))
+(def test-connection (connect test-db-spec))
 
 (facts "About stardog connection pool handling"
        (fact "create-db-spec returns a valid map"
@@ -48,29 +49,29 @@
                    (.isOpen c)) => falsey))
 
 (facts "About Stardog SPARQL queries"
-       (let [c (connect test-db-spec)
-             r (query c "select ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 5")]
+       (with-open [c (connect test-db-spec)]
+            (let [r (query c "select ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 5")]
          (fact "query results should have 5 elements"
-               (count r) => 5)))
+               (count r) => 5))))
 
 (facts "About add and remove triples"
        (fact "Insert a vector representing a triple"
-             (let [c (connect test-db-spec)]
+             (with-open [c (connect test-db-spec)]
                (with-transaction [c] (insert! c ["urn:test" "urn:test:clj:prop" "Hello World"]))) => nil)
         (fact "Insert a vector representing a triple"
-             (let [c (connect test-db-spec)]
+             (with-open [c (connect test-db-spec)]
                (with-transaction [c] (remove! c ["urn:test" "urn:test:clj:prop" "Hello World"]))) => nil)
         (fact "Attempting to insert a partial statement throws IllegalArgumentException"
-               (let [c (connect test-db-spec)]
+               (with-open [c (connect test-db-spec)]
                (with-transaction [c] (insert! c ["urn:test" "urn:test:clj:prop"]))) => (throws IllegalArgumentException))
         (fact "Multiple inserts in a tx"
-               (let [c (connect test-db-spec)]
+               (with-open [c (connect test-db-spec)]
                (with-transaction [c]
                  (insert! c ["urn:test" "urn:test:clj:prop2" "Hello World"])
                  (insert! c ["urn:test" "urn:test:clj:prop2" "Hello World2"]))
                (count (query c "select ?s ?p ?o WHERE { ?s <urn:test:clj:prop2> ?o } LIMIT 5")) => 2) )
        (fact "Multiple inserts in a tx"
-               (let [c (connect test-db-spec)]
+               (with-open [c (connect test-db-spec)]
                (with-transaction [c]
                  (remove! c ["urn:test" "urn:test:clj:prop2" "Hello World"])
                  (remove! c ["urn:test" "urn:test:clj:prop2" "Hello World2"]))
@@ -79,19 +80,19 @@
 
 (facts "About query converter handling"
        (fact "Convert keys to strings"
-             (let [c (connect test-db-spec)
-                   r (query c "select ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 5" {:key-converter #(.toString %)})]
-               (keys (first r))) => ["s" "p" "o"])
+             (with-open [c (connect test-db-spec)]
+                 (let [r (query c "select ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 5" {:key-converter #(.toString %)})]
+               (keys (first r))) => ["s" "p" "o"]))
        (fact "Convert values to strings"
-             (let [c (connect test-db-spec)
-                   r (query c "select ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 5" {:converter #(str "aaa" %)})]
-               (first (vals (first r)))) => (contains "aaa")))
+             (with-open [c (connect test-db-spec)]
+                  (let [r (query c "select ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 5" {:converter #(str "aaa" %)})]
+               (first (vals (first r)))) => (contains "aaa"))))
 
 (facts "About reasoning connections"
        (fact "use reasoning on a connect"
-             (let [c (connect reasoning-db-spec)
-                   r (query c "select ?s ?p ?o WHERE { ?s a <http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#Person> }")]
-               (count r) => 719))
+            (with-open [c (connect reasoning-db-spec)]
+             (let [r (query c "select ?s ?p ?o WHERE { ?s a <http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#Person> }")]
+               (count r) => 719)))
        (fact "use reasoning on a connection pool"
               (let [ds (make-datasource reasoning-db-spec)]
                   (with-connection-pool [c ds]
@@ -101,14 +102,23 @@
 
 (facts "About query limit handling"
        (fact "Handle query limit"
-             (let [c (connect test-db-spec)
-                   r (query c "select ?s ?p ?o WHERE { ?s ?p ?o }" {:limit 5})]
-               (count r)) => 5))
+             (with-open [c (connect test-db-spec)]
+               (let [r (query c "select ?s ?p ?o WHERE { ?s ?p ?o }" {:limit 5})]
+               (count r)) => 5)))
 
 (facts "About ask queries"
        (fact "ask queries can use connections"
-             (let [c (connect test-db-spec)
-                   r (ask c "ask { ?s <http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#teacherOf> ?o }")]
-               r) => truthy))
+             (with-open [c (connect test-db-spec)]
+               (ask c "ask { ?s <http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#teacherOf> ?o }")) => truthy))
+
+(facts "About update queries"
+       (fact "update queriers can use connections"
+             (with-open [c (connect test-db-spec)]
+               (with-transaction [c]
+                 (insert! c ["urn:testUpdate:a1" "urn:testUpdate:b" "aloha world"]))
+               (update c "DELETE { ?a ?b \"aloha world\" } INSERT { ?a ?b \"shalom world\" } WHERE { ?a ?b \"aloha world\"  }"
+                         {:parameters {"?a" "urn:testUpdate:a1" "?b" "urn:testUpdate:b"}})
+               (ask c "ask { ?s ?p \"shalom world\" }") => truthy)))
+
 
 
