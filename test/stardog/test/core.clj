@@ -120,5 +120,14 @@
                          {:parameters {"?a" "urn:testUpdate:a1" "?b" "urn:testUpdate:b"}})
                (ask c "ask { ?s ?p \"shalom world\" }") => truthy)))
 
+(facts "About transact with pools"
+        (fact "use transact with a connection pool"
+              (let [ds (make-datasource reasoning-db-spec)]
+                  (transact ds
+                     (fn [conn]
+                        (insert! conn ["urn:test" "urn:test:clj:prop3" "Hello World"])))
+                  (with-connection-pool [c ds]
+                   (count (query c "select ?s ?p ?o WHERE { ?s <urn:test:clj:prop3> ?o } LIMIT 5")) => 1) )))
+
 
 
