@@ -1,7 +1,7 @@
 # stardog-clj
 
 Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
-_Current Version **0.1.0**_
+_Current Version **0.2.0**_
 
 Stardog-clj - Clojure language bindings to use to develop apps with the [Stardog Graph / RDF Database](http://stardog.com).
 
