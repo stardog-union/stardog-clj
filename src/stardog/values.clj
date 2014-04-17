@@ -61,7 +61,7 @@
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#short"
   [^Literal v] (.shortValue v))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#string"
-  [^Literal v] (.getLabel v))
+  [^Literal v] (.stringValue v))
 (defmethod typed-value :default
   [^Literal v]
   (let [lang (.getLanguage v)

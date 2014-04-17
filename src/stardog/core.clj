@@ -90,11 +90,18 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Utility functions for marshalling API calls
 
-(defn as-map
+(defn binding->map
   "Converts a BindingSet into a map."
   [^IFn key-fn ^IFn value-fn ^BindingSet mb]
   (into {} (map (fn [^Binding b] [(key-fn (.getName b)) (value-fn (.getValue b))])
                 (iterator-seq (.iterator mb)))))
+
+(defn statement->map
+  "Converts a Statement into a map."
+  [^IFn value-fn ^StatementImpl mb]
+  (vector (value-fn (.getSubject mb))
+          (value-fn (.getPredicate mb))
+          (value-fn (.getObject mb))))
 
 ;; From http://stackoverflow.com/questions/9225948/how-do-turn-a-java-iterator-like-object-into-a-clojure-sequence
 ;; Leaving both as-seq and iteration->seq, lazy and not lazy respectively
@@ -119,8 +126,15 @@
 (defn key-map-results
   "Converts a Iteration of bindings into a seq of keymaps."
   [^IFn keyfn ^IFn valfn ^Iteration results]
-  (let [mapper (partial as-map keyfn valfn)]
+  (let [mapper (partial binding->map keyfn valfn)]
     (map mapper (as-seq results))))
+
+(defn vector-map-results
+  "Converts a Graph of statements into a seq of vectors."
+  [^IFn valfn ^Iteration results]
+  (let [mapper (partial statement->map valfn)]
+    (map mapper (as-seq results))))
+
 
 (defprotocol ClojureResult
   (clojure-data* [results keyfn valfn]
@@ -130,7 +144,7 @@
   GraphQueryResult
   (clojure-data* [results keyfn valfn]
     (let [namespaces (into {} (.getNamespaces results))]
-      (with-meta {:namespaces namespaces} (key-map-results keyfn valfn results))))
+       (with-meta (vector-map-results valfn results) {:namespaces namespaces})))
   TupleQueryResult
   (clojure-data* [results keyfn valfn] (key-map-results keyfn valfn results))
   Boolean
