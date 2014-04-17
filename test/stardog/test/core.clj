@@ -14,7 +14,8 @@
 
 (ns stardog.test.core
   (:use [stardog.core]
-        [midje.sweet])
+        [midje.sweet]
+        [stardog.values])
    (:import [com.complexible.stardog.api  Connection
                                           ConnectionPool
                                           ConnectionPoolConfig
@@ -132,6 +133,10 @@
 
 (facts "About running a construct query"
        (fact "use a graph query with a connect"
+             (with-open [c (connect test-db-spec)]
+               (let [g (graph c "CONSTRUCT { <urn:test> ?p ?o } WHERE { <urn:test> ?p ?o } ")]
+                 g) => (list [(as-uri "urn:test") (as-uri "urn:test:clj:prop3") "Hello World"])))
+       (fact "use a graph query with converter"
              (with-open [c (connect test-db-spec)]
                (let [g (graph c "CONSTRUCT { <urn:test> ?p ?o } WHERE { <urn:test> ?p ?o } " {:converter #(str %) :key-converter #(str %)})]
                  g) => (list ["urn:test" "urn:test:clj:prop3" "\"Hello World\""]))))
