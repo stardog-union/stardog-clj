@@ -141,4 +141,15 @@
                (let [g (graph c "CONSTRUCT { <urn:test> ?p ?o } WHERE { <urn:test> ?p ?o } " {:converter #(str %) :key-converter #(str %)})]
                  g) => (list ["urn:test" "urn:test:clj:prop3" "\"Hello World\""]))))
 
+(facts "About stardog namespace api"
+       (fact "ability to add a namespace"
+             (with-open [c (connect test-db-spec)]
+               (add-ns! c "myns" "http://test.com") => truthy))
+       (fact "ability to remove a namespace"
+             (with-open [c (connect test-db-spec)]
+               (remove-ns! c "myns") => truthy))
+       (fact "list namespaces"
+             (with-open [c (connect test-db-spec)]
+               (count (list-namespaces c)) => 97)))
+
 

@@ -292,6 +292,23 @@
           obj  (-> (nth triple-list 2) (values/convert))]
       (.statement remover (StatementImpl. subj pred obj))))
 
+(defn add-ns!
+  "Adds a namespace prefix"
+  [^Connection connection ^String prefix ^String rdf-ns]
+  (let [ns-api (.namespaces connection)]
+    (.add ns-api prefix rdf-ns)))
+
+(defn remove-ns!
+  "Removes a namespace prefix"
+  [^Connection connection ^String prefix]
+  (let [ns-api (.namespaces connection)]
+    (.remove ns-api prefix)))
+
+(defn list-namespaces
+  "Lists configured namespaces in the database"
+  [^Connection connection]
+  (let [ns-api (.namespaces connection)]
+    (iterator-seq (.iterator ns-api))))
 
 (defn transact
   "(transact pool (something con ..))
