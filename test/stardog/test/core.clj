@@ -29,16 +29,16 @@
             [info.aduna.iteration Iteration]))
 
 
-(def test-db-spec (create-db-spec "testdb" "snarl://localhost:5820/" "admin" "admin" "none"))
-(def reasoning-db-spec (create-db-spec "testdb" "snarl://localhost:5820/" "admin" "admin" "QL"))
+(def test-db-spec (create-db-spec "testdb" "http://localhost:5820/" "admin" "admin" "none"))
+(def reasoning-db-spec (create-db-spec "testdb" "http://localhost:5820/" "admin" "admin" "QL"))
 (def test-connection (connect test-db-spec))
 
 (facts "About stardog connection pool handling"
        (fact "create-db-spec returns a valid map"
-             (create-db-spec "testdb" "snarl://localhost:5820/" "admin" "admin" "none") =>
-                             {:url "snarl://localhost:5820/" :db "testdb" :pass "admin" :user "admin" :max-idle 100 :max-pool 200 :min-pool 10 :reasoning "none"})
+             (create-db-spec "testdb" "http://localhost:5820/" "admin" "admin" "none") =>
+                             {:url "http://localhost:5820/" :db "testdb" :pass "admin" :user "admin" :max-idle 100 :max-pool 200 :min-pool 10 :reasoning "none"})
        (fact "make-datasource creates a map with a connection pool"
-             (str (type (:ds (make-datasource (create-db-spec "testdb" "snarl://localhost:5820/" "admin" "admin" "none"))))) =>
+             (str (type (:ds (make-datasource (create-db-spec "testdb" "http://localhost:5820/" "admin" "admin" "none"))))) =>
              (contains "com.complexible.stardog.api.ConnectionPool")))
 
 (facts "About stardog connection handling"
