@@ -18,7 +18,7 @@ Out of the box, Stardog provides a Java API, SNARL, for communicating with the S
 
 ### Query Execution
 
-```
+```clojure
 => (use 'stardog.core)
 => (def c (connect {:db "my-database" :server "snarl://localhost"}))
 => (def results (query c "select ?n { .... }"))
@@ -31,7 +31,7 @@ Out of the box, Stardog provides a Java API, SNARL, for communicating with the S
 ```
 
 ### Insert triples
-```
+```clojure
 (with-open [c (connect {:db "my-database" :server "snarl://localhost"})]
   (with-transaction [c]
     (insert! c ["urn:a:subject" "urn:a:predicate" "an object"])
@@ -61,7 +61,7 @@ sequence (not on sub-sequences).
 
 While there are no update api wrappers yet, there is a macro for dealing with transactions:
 
-```
+```clojure
 (with-open [c (connect {:db "my-database" :server "snarl://localhost"})]
   (with-transaction [c]
     (.. c
