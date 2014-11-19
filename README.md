@@ -12,6 +12,14 @@ Stardog-clj - Clojure language bindings to use to develop apps with the [Stardog
 
 ## Usage
 
+To use stardog-clj, follow these simple steps:
+
+1. Download [Stardog](http://stardog.com), and unzip it
+2. In the Stardog distribution's bin folder, run the mavenInstall script
+3. In your application, add the stardog-clj dependency to your project.clj file, or equivalent build tool.  For example, `[stardog-clj "2.2.2"]`
+4. Note that stardog-clj uses the HTTP SNARL binding by default, so make a datasource using an HTTP URL for the database. `(create-db-spec "inventory" "http://localhost:5820/" "admin" "admin" "none")`
+5. If you want to switch from HTTP to the SNARL protocol, add the SNARL depenendeices.  See the [Maven documentation](http://docs.stardog.com/java/#sd-Support-for-Maven) for the different dependency options.
+6. Note that the reasoning dependency is already available, so feel free to change the reasoning level in your datasource configuration, e.g. `(create-db-spec "inventory" "http://localhost:5820/" "admin" "admin" "SL")` will create a database spec with the Stardog Level of reasoning.  
 
 Out of the box, Stardog provides a Java API, SNARL, for communicating with the Stardog database.  SNARL is a connection oriented API, with both a connection and connection pool available, similar to JDBC.  Queries can be made using the SPARQL query language, or by using various SNARL APIs for navigating the structure of the data. Stardog-clj provides APIs to do all of these functions using idiomatic clojure style of programming.  The API builds upon itself, being able to wrap usage with connection pools, create connections directly, etc.
 
