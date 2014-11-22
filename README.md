@@ -17,14 +17,16 @@ To use stardog-clj, follow these simple steps:
 1. Download [Stardog](http://stardog.com), and unzip it
 2. In the Stardog distribution's bin folder, run the mavenInstall script
 3. In your application, add the stardog-clj dependency to your project.clj file, or equivalent build tool.  For example, `[stardog-clj "2.2.2"]`
-4. Note that stardog-clj uses the HTTP SNARL binding by default, so make a datasource using an HTTP URL for the database. `(create-db-spec "inventory" "http://localhost:5820/" "admin" "admin" "none")`
+4. Note that stardog-clj uses the HTTP binding by default, so make a datasource using an HTTP URL for the database. `(create-db-spec "inventory" "http://localhost:5820/" "admin" "admin" "none")`
 5. If you want to switch from HTTP to the SNARL protocol, add the SNARL depenendeices.  See the [Maven documentation](http://docs.stardog.com/java/#sd-Support-for-Maven) for the different dependency options.
-6. Note that the reasoning dependency is already available, so feel free to change the reasoning level in your datasource configuration, e.g. `(create-db-spec "inventory" "http://localhost:5820/" "admin" "admin" "SL")` will create a database spec with the Stardog Level of reasoning.  
+6. Note that the reasoning dependency is already available, so feel free to change the reasoning level in your datasource configuration, e.g. `(create-db-spec "inventory" "http://localhost:5820/" "admin" "admin" "SL")` will create a database spec with the Stardog Level of reasoning.
 
 Out of the box, Stardog provides a Java API, SNARL, for communicating with the Stardog database.  SNARL is a connection oriented API, with both a connection and connection pool available, similar to JDBC.  Queries can be made using the SPARQL query language, or by using various SNARL APIs for navigating the structure of the data. Stardog-clj provides APIs to do all of these functions using idiomatic clojure style of programming.  The API builds upon itself, being able to wrap usage with connection pools, create connections directly, etc.
 
 
 ### Query Execution
+
+All Stardog queries are executed given a connection, a query string, and an optional map of parameters.  The connection can be created using the `connnect` function, or with the `with-connection-pool` macro.  Connection configuration is a simple map, and there is a helper function for creating database specs, using the `make-datasource` function.
 
 ```clojure
 => (use 'stardog.core)
@@ -39,6 +41,9 @@ Out of the box, Stardog provides a Java API, SNARL, for communicating with the S
 ```
 
 ### Insert triples
+
+Stardog-clj includes easy to use functions for adding triples or removing triples from the Stardog database.  The shape of the data used in the API is a vector of three elements, confirming to the subject, predicate, object "triple", also known as an entity attribute value model.
+
 ```clojure
 (with-open [c (connect {:db "my-database" :server "snarl://localhost"})]
   (with-transaction [c]
@@ -46,15 +51,15 @@ Out of the box, Stardog provides a Java API, SNARL, for communicating with the S
 ```
 
 There are wrappers for:
- * connect
- * query
- * update
- * ask
- * graph
- * adder
+ * `query` for the SPARQL SELECT query
+ * `update` for the SPARQL 1.1 UPDATE queries
+ * `ask` for running SPARQL ASK queries
+ * `graph` for running SPARQL CONSTRUCT queries
+ * `insert!` and `remove!` for the SNARL adder and remover to add or remove RDF statements
+ * `connect` for connection handling, including connection pools
+ * namespace manipulation, for adding and removing server mananaged namespace prefixes
 
-Most query options are available for configuring as keys in the parameter map. When requesting
-reasoners, use strings or keywords.
+Most query options are available for configuring as keys in the parameter map. When requesting reasoners, use strings or keywords.
 
 ### Query Results
 
@@ -67,7 +72,7 @@ sequence (not on sub-sequences).
 
 ### Transactions
 
-While there are no update api wrappers yet, there is a macro for dealing with transactions:
+There is a macro for dealing with transactions, where you can directly use the connection to perform bulk add operations, such as below, or for putting multiple `insert!` and `remove!` calls into a single transaction.
 
 ```clojure
 (with-open [c (connect {:db "my-database" :server "snarl://localhost"})]
@@ -79,9 +84,9 @@ While there are no update api wrappers yet, there is a macro for dealing with tr
         (stream (input-stream "data.n3")))))
 ```
 
-Note: the with-open macro closes a connection, which is not recommended for using the Stardog connection pool.  In lieu of with-open, there is a with-connection-pool macro available, that provides appropriate connection pool resource handling.
+Note: the usual `with-open` macro closes a connection, which is not recommended for using the Stardog connection pool.  In lieu of with-open, there is a `with-connection-pool` macro available, that provides appropriate connection pool resource handling.
 
-## Building
+## Building the library
 
 To build stardog-clj, you must perform the following steps:
 
@@ -91,6 +96,7 @@ To build stardog-clj, you must perform the following steps:
 4. Run "stardog-admin db create -n testdb path/to/data/University0_0.owl path/to/data/lubmSchema.owl"
 5. You can now run lein compile, use the lein repl, and run lein midje to perform the tests
 
+The test suite does run with the assumption there is a Stardog database server running.
 
 
 ## License
