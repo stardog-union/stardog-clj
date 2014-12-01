@@ -13,7 +13,7 @@
  ; See the License for the specific language governing permissions and
  ; limitations under the License.
 
-(defproject stardog-clj "2.2.2"
+(defproject stardog-clj "2.2.3"
   :description "Stardog-clj: Clojure bindings for Stardog"
   :url "http://stardog.com"
   :license {:name "Apache License"
@@ -21,13 +21,13 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
               ;   [com.complexible.stardog/common-rdf "2.2.1"]
               ;   [com.complexible.stardog/openrdf-utils "2.2.1"]
-                 [com.complexible.stardog/shared "2.2.2"]
-                 [org.openrdf.sesame/sesame "2.7.12"]
-                 [com.complexible.stardog/api "2.2.2"]
+                 [com.complexible.stardog/shared "2.2.3"]
+                 [org.openrdf.sesame/sesame "2.7.14"]
+                 [com.complexible.stardog/api "2.2.3"]
               ;   [com.complexible.stardog.protocols.snarl/client "2.2.1"]
-                 [com.complexible.stardog.protocols.http/client "2.2.2"]
+                 [com.complexible.stardog.protocols.http/client "2.2.3"]
               ;   [com.complexible.stardog.reasoning.snarl/client "2.2.1"]
-                 [com.complexible.stardog.reasoning.http/client "2.2.2"]
+                 [com.complexible.stardog.reasoning.http/client "2.2.3"]
               ;   [com.complexible.stardog.search.snarl/client "2.2.1"]
               ;   [com.complexible.stardog.search.http/client "2.2.1"]
               ;   [com.complexible.stardog.icv.snarl/client "2.2.1"]
