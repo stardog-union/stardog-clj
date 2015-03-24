@@ -35,11 +35,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Connection management
 
-(defn reasoning-type
-  ^ReasoningType [r]
-  (let [t (str/upper-case (name r))]
-    (ReasoningType/valueOf t)))
-
 (defn create-db-spec
   "Helper function to create a dbspec with sensible defaults for nontypical parameters"
   [db url user pass reasoning]
@@ -62,7 +57,7 @@
     (let [config (ConnectionConfiguration/to db)]
       (when user (.credentials config user pass))
       (when url (.server config url))
-      (when reasoning (.reasoning config (reasoning-type reasoning)))
+      (when reasoning (.reasoning config reasoning))
       (.connect config)))
   String
   (connect [cs] (ConnectionConfiguration/at cs)))
@@ -76,7 +71,7 @@
         con-config (-> (ConnectionConfiguration/to db )
                        (.server url)
                        (.credentials user pass)
-                       (.reasoning (reasoning-type reasoning))
+                       (.reasoning reasoning)
                        )
         pool-config (-> (ConnectionPoolConfig/using con-config)
                         (.minPool min-pool)
@@ -171,7 +166,7 @@
   (when dataset (.dataset q dataset))
   (when (instance? ReadQuery q)
     (let [^ReadQuery rq q]
-      (when reasoning (.reasoning rq (reasoning-type reasoning)))
+      (when reasoning (.reasoning rq (boolean reasoning)))
       (when limit (.limit rq limit))
       (when offset (.offset rq offset))))
   q)
@@ -202,7 +197,7 @@
     ;; walk down the arguments and pull them out positionally
     :default (let [[base a] (check-arg string? args)
                    [params a] (check-arg map? a)
-                   [reasoning a] (check-arg #(or (string? %) (keyword? %)) a)
+                   [reasoning a] (check-arg #(or (true? %) (false? %)) a)
                    [converter a] (check-arg fn? a)
                    [key-converter [limit offset]] (check-arg fn? a)]
                (->> {:base base :parameters params :reasoning reasoning
@@ -223,7 +218,7 @@
    Positional arguments are in order:
    - base: The base URI for the query (String).
    - parameters: A parameter map to bind parameters in the query (Map).
-   - reasoning: The type of reasoning to use with the query (String/keyword).
+   - reasoning: boolean true/false for reasoning, or not
    - converter: A function to convert returned values with (Function).
    - key-converter: A function to convert returned binding names with (Function).
    - limit: The limit for the result. Must be present to use offset (integer).

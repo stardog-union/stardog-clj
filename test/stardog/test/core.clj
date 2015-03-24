@@ -23,22 +23,21 @@
             [clojure.lang IFn]
             [java.util Map]
             [com.complexible.stardog.api ConnectionConfiguration Connection Query ReadQuery]
-            [com.complexible.stardog.reasoning.api ReasoningType]
             [org.openrdf.query TupleQueryResult GraphQueryResult BindingSet Binding]
             [org.openrdf.model URI Literal BNode]
             [info.aduna.iteration Iteration]))
 
 
-(def test-db-spec (create-db-spec "testdb" "http://localhost:5820/" "admin" "admin" "none"))
-(def reasoning-db-spec (create-db-spec "testdb" "http://localhost:5820/" "admin" "admin" "QL"))
+(def test-db-spec (create-db-spec "testdb" "http://localhost:5820/" "admin" "admin" false))
+(def reasoning-db-spec (create-db-spec "testdb" "http://localhost:5820/" "admin" "admin" true))
 (def test-connection (connect test-db-spec))
 
 (facts "About stardog connection pool handling"
        (fact "create-db-spec returns a valid map"
-             (create-db-spec "testdb" "http://localhost:5820/" "admin" "admin" "none") =>
-                             {:url "http://localhost:5820/" :db "testdb" :pass "admin" :user "admin" :max-idle 100 :max-pool 200 :min-pool 10 :reasoning "none"})
+             (create-db-spec "testdb" "http://localhost:5820/" "admin" "admin" false) =>
+                             {:url "http://localhost:5820/" :db "testdb" :pass "admin" :user "admin" :max-idle 100 :max-pool 200 :min-pool 10 :reasoning false})
        (fact "make-datasource creates a map with a connection pool"
-             (str (type (:ds (make-datasource (create-db-spec "testdb" "http://localhost:5820/" "admin" "admin" "none"))))) =>
+             (str (type (:ds (make-datasource (create-db-spec "testdb" "http://localhost:5820/" "admin" "admin" false))))) =>
              (contains "com.complexible.stardog.api.ConnectionPool")))
 
 (facts "About stardog connection handling"
