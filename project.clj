@@ -19,14 +19,8 @@
   :license {:name "Apache License"
             :url "http://www.apache.org/licenses/LICENSE-2.0"}
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [com.complexible.stardog.search.http/stardog-search-protocols-http-client "3.0"]
-                 [com.complexible.stardog.reasoning.http/stardog-reasoning-protocols-http-client "3.0"]
-                 [com.complexible.stardog.versioning.http/stardog-versioning-protocols-http-client "3.0"]
-                 [com.complexible.stardog.protocols.http/stardog-protocols-http-client "3.0"]
-                 [com.complexible.common/cp-common-utils "4.0"]
-                 [com.complexible.stardog.icv.http/stardog-icv-protocols-http-client "3.0"]
-                 [com.complexible.stardog/stardog-api "3.0"]
-                 [org.openrdf.sesame/sesame "2.7.14"]
+                 [com.complexible.stardog/client-http "3.0" :extension "pom"]
+                 [org.openrdf.sesame/sesame "2.7.14"]  ; needed for lein deps
 
 		]
   :repositories [["stardog" "http://maven.stardog.com"]]
