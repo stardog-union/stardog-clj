@@ -23,7 +23,6 @@
                                           ConnectionConfiguration]
             [clojure.lang IFn]
             [java.util Map]
-            [com.complexible.common.openrdf.model Graphs]
             [com.complexible.stardog.api ConnectionConfiguration Connection Query ReadQuery]
             [com.complexible.stardog.reasoning.api ReasoningType]
             [org.openrdf.query TupleQueryResult GraphQueryResult BindingSet Binding]

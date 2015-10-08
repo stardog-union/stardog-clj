@@ -16,10 +16,10 @@
   (:use [stardog.values]
         [midje.sweet])
    (:import [org.openrdf.model URI Literal BNode Value]
-            [org.openrdf.model.impl CalendarLiteralImpl
-                                    IntegerLiteralImpl
+            [org.openrdf.model.impl CalendarLiteral
+                                    IntegerLiteral
                                     LiteralImpl
-                                    NumericLiteralImpl
+                                    NumericLiteral
                                     URIImpl]
             [java.util Date GregorianCalendar UUID]
             [javax.xml.datatype DatatypeConfigurationException
@@ -32,13 +32,13 @@
        (fact "Converting a URI to a URI Impl isomorphic with standardize"
              (standardize (convert (java.net.URI. "http://test.com"))) => (as-uri "http://test.com") )
        (fact "Converting an Integer"
-             (type (convert (Integer. 1))) => NumericLiteralImpl)
+             (type (convert (Integer. 1))) => NumericLiteral)
        (fact "Converting an Integer isomorphic with standardize"
              (standardize (convert (Integer. 1))) => (Integer. 1))
        (fact "Converting a String"
              (type (convert "test")) => LiteralImpl)
        (fact "Converting a java.util.Date"
-             (type (convert (Date.))) => CalendarLiteralImpl)
+             (type (convert (Date.))) => CalendarLiteral)
        (fact "LiteralImpl to String"
              (standardize (convert "test")) => "test")
        (fact "CalendarImpl to java.util.Date"

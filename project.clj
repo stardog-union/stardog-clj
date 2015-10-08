@@ -13,16 +13,16 @@
  ; See the License for the specific language governing permissions and
  ; limitations under the License.
 
-(defproject stardog-clj "3.1.4"
+(defproject stardog-clj "4.0-RC1"
   :description "Stardog-clj: Clojure bindings for Stardog"
   :url "http://stardog.com"
   :license {:name "Apache License"
             :url "http://www.apache.org/licenses/LICENSE-2.0"}
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [com.complexible.stardog/client-snarl "3.1.4" :extension "pom"]
-                 [com.complexible.stardog/client-http "3.1.4" :extension "pom"]
-                 [org.openrdf.sesame/sesame-query "2.7.14"]  ; needed for lein deps
-                 [org.openrdf.sesame/sesame-rio-api "2.7.14"]
+                 [com.complexible.stardog/client-snarl "4.0-RC1" :extension "pom"]
+                 [com.complexible.stardog/client-http "4.0-RC1" :extension "pom"]
+                 ;[org.openrdf.sesame/sesame-query "2.7.14"]  ; needed for lein deps
+                 ;[org.openrdf.sesame/sesame-rio-api "2.7.14"]
 
 		]
   :repositories [["stardog" "http://maven.stardog.com"]]

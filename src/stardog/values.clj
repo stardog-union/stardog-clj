@@ -15,11 +15,11 @@
 
 (ns stardog.values
   (:import [org.openrdf.model URI Literal BNode Value]
-           [org.openrdf.model.impl CalendarLiteralImpl
-                                   IntegerLiteralImpl
+           [org.openrdf.model.impl CalendarLiteral
+                                   IntegerLiteral
                                    LiteralImpl
-                                   BooleanLiteralImpl
-                                   NumericLiteralImpl
+                                   BooleanLiteral
+                                   NumericLiteral
                                    URIImpl]
            [java.util Date GregorianCalendar UUID Map]
            [javax.xml.datatype DatatypeConfigurationException DatatypeFactory XMLGregorianCalendar]))
@@ -97,11 +97,11 @@
   (convert [v] (let [g (doto (GregorianCalendar.) (.setTime v))]
                  (-> (DatatypeFactory/newInstance)
                      (.newXMLGregorianCalendar g)
-                     (CalendarLiteralImpl.))))
+                     (CalendarLiteral.))))
   GregorianCalendar
   (convert [v] (-> (DatatypeFactory/newInstance)
                    (.newXMLGregorianCalendar v)
-                   (CalendarLiteralImpl.)))
+                   (CalendarLiteral.)))
   java.net.URI
   (convert [v] (to-uri v))
   java.net.URL
@@ -109,23 +109,23 @@
   UUID
   (convert [v] (to-uri (str "urn:uuid:" v)))
   Boolean
-  (convert [v] (if v BooleanLiteralImpl/TRUE BooleanLiteralImpl/FALSE))
+  (convert [v] (if v BooleanLiteral/TRUE BooleanLiteral/FALSE))
   Byte
-  (convert [v] (NumericLiteralImpl. (byte v)))
+  (convert [v] (NumericLiteral. (byte v)))
   Short
-  (convert [v] (NumericLiteralImpl. (short v)))
+  (convert [v] (NumericLiteral. (short v)))
   Float
-  (convert [v] (NumericLiteralImpl. (float v)))
+  (convert [v] (NumericLiteral. (float v)))
   Double
-  (convert [v] (NumericLiteralImpl. (double v)))
+  (convert [v] (NumericLiteral. (double v)))
   Integer
-  (convert [v] (NumericLiteralImpl. (int v)))
+  (convert [v] (NumericLiteral. (int v)))
   Long
-  (convert [v] (NumericLiteralImpl. (long v)))
+  (convert [v] (NumericLiteral. (long v)))
   BigInteger
-  (convert [v] (IntegerLiteralImpl. (biginteger v)))
+  (convert [v] (IntegerLiteral. (biginteger v)))
   BigDecimal
-  (convert [v] (NumericLiteralImpl. (bigdec v) (to-uri "http://www.w3.org/2001/XMLSchema#decimal")))
+  (convert [v] (NumericLiteral. (bigdec v) (to-uri "http://www.w3.org/2001/XMLSchema#decimal")))
   String
   (convert [v] (LiteralImpl. v))
   Map

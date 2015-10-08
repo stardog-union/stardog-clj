@@ -138,7 +138,7 @@
        (fact "use a graph query with converter"
              (with-open [c (connect test-db-spec)]
                (let [g (graph c "CONSTRUCT { <urn:test> ?p ?o } WHERE { <urn:test> ?p ?o } " {:converter #(str %) :key-converter #(str %)})]
-                 g) => (list ["urn:test" "urn:test:clj:prop3" "\"Hello World\""]))))
+                 g) => (list ["urn:test" "urn:test:clj:prop3" "\"Hello World\"^^<http://www.w3.org/2001/XMLSchema#string>"]))))
 
 (facts "About stardog namespace api"
        (fact "ability to add a namespace"
@@ -149,6 +149,6 @@
                (remove-ns! c "myns") => truthy))
        (fact "list namespaces"
              (with-open [c (connect test-db-spec)]
-               (count (list-namespaces c)) => 97)))
+               (count (list-namespaces c)) => 96)))
 
 
