@@ -21,6 +21,7 @@
                                    BooleanLiteral
                                    NumericLiteral
                                    URIImpl]
+           [com.complexible.common.rdf.model Values]
            [java.util Date GregorianCalendar UUID Map]
            [javax.xml.datatype DatatypeConfigurationException DatatypeFactory XMLGregorianCalendar]))
 
@@ -97,11 +98,11 @@
   (convert [v] (let [g (doto (GregorianCalendar.) (.setTime v))]
                  (-> (DatatypeFactory/newInstance)
                      (.newXMLGregorianCalendar g)
-                     (CalendarLiteral.))))
+                     (Values/literal))))
   GregorianCalendar
   (convert [v] (-> (DatatypeFactory/newInstance)
                    (.newXMLGregorianCalendar v)
-                   (CalendarLiteral.)))
+                   (Values/literal)))
   java.net.URI
   (convert [v] (to-uri v))
   java.net.URL
@@ -111,23 +112,23 @@
   Boolean
   (convert [v] (if v BooleanLiteral/TRUE BooleanLiteral/FALSE))
   Byte
-  (convert [v] (NumericLiteral. (byte v)))
+  (convert [v] (Values/literal (byte v)))
   Short
-  (convert [v] (NumericLiteral. (short v)))
+  (convert [v] (Values/literal (short v)))
   Float
-  (convert [v] (NumericLiteral. (float v)))
+  (convert [v] (Values/literal (float v)))
   Double
-  (convert [v] (NumericLiteral. (double v)))
+  (convert [v] (Values/literal (double v)))
   Integer
-  (convert [v] (NumericLiteral. (int v)))
+  (convert [v] (Values/literal (int v)))
   Long
-  (convert [v] (NumericLiteral. (long v)))
+  (convert [v] (Values/literal (long v)))
   BigInteger
-  (convert [v] (IntegerLiteral. (biginteger v)))
+  (convert [v] (Values/literal (biginteger v)))
   BigDecimal
-  (convert [v] (NumericLiteral. (bigdec v) (to-uri "http://www.w3.org/2001/XMLSchema#decimal")))
+  (convert [v] (Values/literal (bigdec v)))
   String
-  (convert [v] (LiteralImpl. v))
+  (convert [v] (Values/literal v))
   Map
   (convert [{:keys [^String value ^String lang datatype]}]
     (let [^org.openrdf.model.URI dt (to-uri datatype)]
