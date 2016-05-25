@@ -1,4 +1,4 @@
- ; Copyright (C) 2014 Paul Gearon
+ ; Copyright (C) 2014 Paula Gearon
  ; Copyright (C) 2014 Clark & Parsia
  ;
  ; Licensed under the Apache License, Version 2.0 (the "License");
