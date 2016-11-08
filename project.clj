@@ -13,14 +13,14 @@
  ; See the License for the specific language governing permissions and
  ; limitations under the License.
 
-(defproject stardog-clj "4.1.0"
+(defproject stardog-clj "4.2.0"
   :description "Stardog-clj: Clojure bindings for Stardog"
   :url "http://stardog.com"
   :license {:name "Apache License"
             :url "http://www.apache.org/licenses/LICENSE-2.0"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                ; [com.complexible.stardog/client-snarl "4.1" :extension "pom"]
-                 [com.complexible.stardog/client-http "4.1" :extension "pom"]
+                ; [com.complexible.stardog/client-snarl "4.2" :extension "pom"]
+                 [com.complexible.stardog/client-http "4.2" :extension "pom"]
 
 		]
   :repositories [["stardog" "http://maven.stardog.com"]]
