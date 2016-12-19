@@ -248,7 +248,7 @@
         q (create-query #(.graph connection text %) #(.graph connection text) args)]
     (execute* q args)))
 
-(defn update
+(defn update!
   "Executes an update operation.
   Optional parameters may be provided as a map or named parameters.
   Parameter names are:

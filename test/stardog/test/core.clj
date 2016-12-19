@@ -116,7 +116,7 @@
              (with-open [c (connect test-db-spec)]
                (with-transaction [c]
                  (insert! c ["urn:testUpdate:a1" "urn:testUpdate:b" "aloha world"]))
-               (update c "DELETE { ?a ?b \"aloha world\" } INSERT { ?a ?b \"shalom world\" } WHERE { ?a ?b \"aloha world\"  }"
+               (update! c "DELETE { ?a ?b \"aloha world\" } INSERT { ?a ?b \"shalom world\" } WHERE { ?a ?b \"aloha world\"  }"
                          {:parameters {"?a" "urn:testUpdate:a1" "?b" "urn:testUpdate:b"}})
                (ask c "ask { ?s ?p \"shalom world\" }") => truthy)))
 
