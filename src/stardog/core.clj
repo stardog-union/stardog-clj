@@ -120,8 +120,10 @@
 (defn key-map-results
   "Converts a Iteration of bindings into a seq of keymaps."
   [^IFn keyfn ^IFn valfn ^Iteration results]
-  (let [mapper (partial binding->map keyfn valfn)]
-    (map mapper (as-seq results))))
+  (let [mapper (partial binding->map keyfn valfn)
+	realized-results (doall (map mapper (iteration->seq results)))
+	_ (.close results)]
+    realized-results))
 
 (defn vector-map-results
   "Converts a Graph of statements into a seq of vectors."
