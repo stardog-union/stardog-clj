@@ -52,10 +52,10 @@
 (extend-protocol Connectable
   java.util.Map
   (connect
-    [{:keys [db user pass url reasoning]}]
+    [{:keys [db user pass url server reasoning]}]
     (let [config (ConnectionConfiguration/to db)]
       (when user (.credentials config user pass))
-      (when url (.server config url))
+      (when-let [server-url (or url server)] (.server config server-url))
       (when reasoning (.reasoning config reasoning))
       (.connect config)))
   String
