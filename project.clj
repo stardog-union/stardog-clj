@@ -1,4 +1,5 @@
- ; Copyright (C) 2014 Clark & Parsia
+ ; Copyright (C) 2016-2017 Stardog Union
+ ; Copyright (C) 2014-2015 Clark & Parsia
  ; Copyright (C) 2014 Paul Gearon
  ;
  ; Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,14 +14,13 @@
  ; See the License for the specific language governing permissions and
  ; limitations under the License.
 
-(defproject stardog-clj "4.2.4"
+(defproject stardog-clj "5.0.0-RC1"
   :description "Stardog-clj: Clojure bindings for Stardog"
   :url "http://stardog.com"
   :license {:name "Apache License"
             :url "http://www.apache.org/licenses/LICENSE-2.0"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                ; [com.complexible.stardog/client-snarl "4.2.4" :extension "pom"]
-                 [com.complexible.stardog/client-http "4.2.4" :extension "pom"]
+                 [com.complexible.stardog/client-http "5.0-RC1" :extension "pom"]
 
 		]
   :repositories [["stardog" "http://maven.stardog.com"]]

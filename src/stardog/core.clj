@@ -143,6 +143,8 @@
        (with-meta (vector-map-results valfn results) {:namespaces namespaces})))
   TupleQueryResult
   (clojure-data* [results keyfn valfn] (key-map-results keyfn valfn results))
+  nil
+  (clojure-data* [results _ valfn] results)
   Boolean
   (clojure-data* [results _ valfn] results))
 

@@ -57,10 +57,10 @@
 (facts "About add and remove triples"
        (fact "Insert a vector representing a triple"
              (with-open [c (connect test-db-spec)]
-               (with-transaction [c] (insert! c ["urn:test" "urn:test:clj:prop" "Hello World"]))) => nil)
+               (with-transaction [c] (insert! c ["urn:test" "urn:test:clj:prop" "Hello World"]))) => truthy)
         (fact "Insert a vector representing a triple"
              (with-open [c (connect test-db-spec)]
-               (with-transaction [c] (remove! c ["urn:test" "urn:test:clj:prop" "Hello World"]))) => nil)
+               (with-transaction [c] (remove! c ["urn:test" "urn:test:clj:prop" "Hello World"]))) => truthy)
         (fact "Attempting to insert a partial statement throws IllegalArgumentException"
                (with-open [c (connect test-db-spec)]
                (with-transaction [c] (insert! c ["urn:test" "urn:test:clj:prop"]))) => (throws IllegalArgumentException))

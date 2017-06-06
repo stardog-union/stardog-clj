@@ -22,8 +22,9 @@
                                     NumericLiteral
                                     URIImpl]
             [com.complexible.common.rdf.model StardogIntLiteral
-                                              StardogCalendarLiteral
-                                              StardogTypedLiteral]
+					      StardogStringLiteral
+					      StardogDateTimeLiteral
+                                              ]
             [java.util Date GregorianCalendar UUID]
             [javax.xml.datatype DatatypeConfigurationException
                                 DatatypeFactory
@@ -39,9 +40,9 @@
        (fact "Converting an Integer isomorphic with standardize"
              (standardize (convert (Integer. 1))) => (Integer. 1))
        (fact "Converting a String"
-             (type (convert "test")) => StardogTypedLiteral)
+             (type (convert "test")) => StardogStringLiteral)
        (fact "Converting a java.util.Date"
-             (type (convert (Date.))) => StardogCalendarLiteral)
+             (type (convert (Date.))) => StardogDateTimeLiteral)
        (fact "LiteralImpl to String"
              (standardize (convert "test")) => "test")
        (fact "CalendarImpl to java.util.Date"
