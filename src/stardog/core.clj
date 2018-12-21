@@ -1,34 +1,31 @@
- ; Copyright (C) 2014 Clark & Parsia
- ; Copyright (C) 2014 Paula Gearon
- ;
- ;
- ; Licensed under the Apache License, Version 2.0 (the "License");
- ; you may not use this file except in compliance with the License.
- ; You may obtain a copy of the License at
- ;
- ;      http://www.apache.org/licenses/LICENSE-2.0
- ;
- ; Unless required by applicable law or agreed to in writing, software
- ; distributed under the License is distributed on an "AS IS" BASIS,
- ; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- ; See the License for the specific language governing permissions and
- ; limitations under the License.
+;; Copyright (C) 2014 Clark & Parsia
+;; Copyright (C) 2014 Paula Gearon
+;;
+;;
+;; Licensed under the Apache License, Version 2.0 (the "License");
+;; you may not use this file except in compliance with the License.
+;; You may obtain a copy of the License at
+;;
+;;      http://www.apache.org/licenses/LICENSE-2.0
+;;
+;; Unless required by applicable law or agreed to in writing, software
+;; distributed under the License is distributed on an "AS IS" BASIS,
+;; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+;; See the License for the specific language governing permissions and
+;; limitations under the License.
 
 (ns stardog.core
-   (:require [clojure.string :as str]
-             [stardog.values :as values])
-   (:import [com.complexible.stardog.api  Connection
-                                          ConnectionPool
-                                          ConnectionPoolConfig
-                                          ConnectionConfiguration]
-            [clojure.lang IFn]
-            [java.util Map]
-            [com.complexible.stardog.api ConnectionConfiguration Connection Query ReadQuery]
-            [com.complexible.stardog.reasoning.api ReasoningType]
-            [org.openrdf.query TupleQueryResult GraphQueryResult BindingSet Binding]
-            [org.openrdf.model URI Literal BNode]
-            [org.openrdf.model.impl StatementImpl]
-            [info.aduna.iteration Iteration]))
+  (:require [clojure.string :as str]
+            [stardog.values :as values])
+  (:import [com.complexible.stardog.api
+            Connection ConnectionPool ConnectionPoolConfig ConnectionConfiguration
+            Query ReadQuery]
+           [clojure.lang IFn]
+           [java.util Map Iterator]
+           [com.complexible.stardog.reasoning.api ReasoningType]
+           [com.stardog.stark Values Namespace]
+           [com.stardog.stark.query SelectQueryResult GraphQueryResult BindingSet Binding]
+           [com.stardog.stark.impl StatementImpl]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -87,61 +84,44 @@
 (defn binding->map
   "Converts a BindingSet into a map."
   [^IFn key-fn ^IFn value-fn ^BindingSet mb]
-  (into {} (map (fn [^Binding b] [(key-fn (.getName b)) (value-fn (.getValue b))])
-                (iterator-seq (.iterator mb)))))
+  (into {} (map (fn [^Binding b] [(key-fn (.name b)) (value-fn (.value b))]))
+        (iterator-seq (.iterator mb))))
 
 (defn statement->map
   "Converts a Statement into a map."
   [^IFn value-fn ^StatementImpl mb]
-  (vector (value-fn (.getSubject mb))
-          (value-fn (.getPredicate mb))
-          (value-fn (.getObject mb))))
-
-;; From http://stackoverflow.com/questions/9225948/how-do-turn-a-java-iterator-like-object-into-a-clojure-sequence
-;; Leaving both as-seq and iteration->seq, lazy and not lazy respectively
-;; until proper benchmarking can be done of the combination of Stardog result set processing and Clojure sequence APIs
-(defn as-seq
-  "Converts an Iteration into a lazy-seq"
-  [^Iteration i]
-  (if-not (.hasNext i) nil (cons (.next i) (lazy-seq (as-seq i)))))
-
-(defn iteration->seq
-   "Converts Iteration into a seq"
-  [iteration]
-  (seq
-    (reify java.lang.Iterable
-      (iterator [this]
-         (reify java.util.Iterator
-           (hasNext [this] (.hasNext iteration))
-           (next [this] (.next iteration))
-           (remove [this] (.remove iteration)))))))
-
+  (vector (value-fn (.subject mb))
+          (value-fn (.predicate mb))
+          (value-fn (.object mb))))
 
 (defn key-map-results
   "Converts a Iteration of bindings into a seq of keymaps."
-  [^IFn keyfn ^IFn valfn ^Iteration results]
+  [^IFn keyfn ^IFn valfn ^Iterator results]
   (let [mapper (partial binding->map keyfn valfn)
-	realized-results (doall (map mapper (iteration->seq results)))
-	_ (.close results)]
+        realized-results (into [] (map mapper) (iterator-seq results))]
+    (.close results)
     realized-results))
 
 (defn vector-map-results
   "Converts a Graph of statements into a seq of vectors."
-  [^IFn valfn ^Iteration results]
-  (let [mapper (partial statement->map valfn)]
-    (map mapper (as-seq results))))
-
+  [^IFn valfn ^Iterator results]
+  (let [mapper (partial statement->map valfn)
+        realized-results (into [] (map mapper) (iterator-seq results))]
+    (.close results)
+    realized-results))
 
 (defprotocol ClojureResult
   (clojure-data* [results keyfn valfn]
-                 "Typed dispatched conversion of query results into Clojure data"))
+    "Typed dispatched conversion of query results into Clojure data"))
 
 (extend-protocol ClojureResult
   GraphQueryResult
   (clojure-data* [results keyfn valfn]
-    (let [namespaces (into {} (.getNamespaces results))]
-       (with-meta (vector-map-results valfn results) {:namespaces namespaces})))
-  TupleQueryResult
+    (let [namespaces (into {}
+                           (map (fn [^Namespace ns] [(.prefix ns) (.iri ns)]))
+                           (iterator-seq (.. results namespaces iterator)))]
+      (with-meta (vector-map-results valfn results) {:namespaces namespaces})))
+  SelectQueryResult
   (clojure-data* [results keyfn valfn] (key-map-results keyfn valfn results))
   nil
   (clojure-data* [results _ valfn] results)
@@ -155,7 +135,7 @@
   ([results keyfn valfn] (clojure-data* results keyfn valfn)))
 
 (defn execute* [^Query q {:keys [key-converter converter]
-                         :or {key-converter keyword converter values/standardize}}]
+                          :or {key-converter keyword converter values/standardize}}]
   (clojure-data (.execute q) key-converter converter))
 
 
@@ -275,20 +255,20 @@
   [^Connection connection triple-list]
   (when (< (count triple-list) 3) (throw (IllegalArgumentException. "triple-list must have 3 elements")))
   (let [adder (.add connection)
-          subj (-> (first triple-list) (values/as-uri) (values/convert) )
-          pred (-> (second triple-list) (values/as-uri) (values/convert))
-          obj  (-> (nth triple-list 2) (values/convert))]
-      (.statement adder (StatementImpl. subj pred obj))))
+        subj (-> (first triple-list) (values/as-uri) (values/convert) )
+        pred (-> (second triple-list) (values/as-uri) (values/convert))
+        obj  (-> (nth triple-list 2) (values/convert))]
+    (.statement adder (StatementImpl. subj pred obj Values/DEFAULT_GRAPH))))
 
 (defn remove!
   "Removes a statements (subject, predicate, object) represented as a 3 item vector"
   [^Connection connection triple-list]
   (when (< (count triple-list) 3) (throw (IllegalArgumentException. "triple-list must have 3 elements")))
   (let [remover (.remove connection)
-          subj (-> (first triple-list) (values/as-uri) (values/convert) )
-          pred (-> (second triple-list) (values/as-uri) (values/convert))
-          obj  (-> (nth triple-list 2) (values/convert))]
-      (.statement remover (StatementImpl. subj pred obj))))
+        subj (-> (first triple-list) (values/as-uri) (values/convert))
+        pred (-> (second triple-list) (values/as-uri) (values/convert))
+        obj  (-> (nth triple-list 2) (values/convert))]
+    (.statement remover (StatementImpl. subj pred obj Values/DEFAULT_GRAPH))))
 
 (defn add-ns!
   "Adds a namespace prefix"
@@ -314,13 +294,13 @@
   [pool func]
   (let [conn (.obtain (:ds pool))
         _ (.begin conn)]
-     (try
+    (try
       (let [result (func conn)]
         (.commit conn)
         result)
-     (catch Throwable t
-       (.rollback conn))
-     (finally
+      (catch Throwable t
+        (.rollback conn))
+      (finally
         (.release (:ds pool) conn)))))
 
 
@@ -329,10 +309,10 @@
   [& pairs]
   `(do (when-not ~(first pairs)
          (throw (IllegalArgumentException.
-                  (str (first ~'&form) " requires " ~(second pairs) " in " ~'*ns* ":" (:line (meta ~'&form))))))
-    ~(let [more (nnext pairs)]
-       (when more
-         (list* `assert-args more)))))
+                 (str (first ~'&form) " requires " ~(second pairs) " in " ~'*ns* ":" (:line (meta ~'&form))))))
+       ~(let [more (nnext pairs)]
+          (when more
+            (list* `assert-args more)))))
 
 
 
@@ -347,8 +327,8 @@
   bindings in with-open."
   [connections & body]
   (assert-args
-    (vector? connections) "a vector for its connections"
-    (every? symbol? connections) "symbols for all connections")
+   (vector? connections) "a vector for its connections"
+   (every? symbol? connections) "symbols for all connections")
   (let [begins (for [c connections] `(.begin ~c))
         rev (reverse connections)
         commits (for [c rev] `(.commit ~c))
@@ -367,8 +347,8 @@
    Establishes a connection and a transaction to execute the body within."
   [bindings & body]
   (assert-args
-    (vector? bindings) "a vector for its binding"
-    (even? (count bindings)) "an even number of forms in binding vector")
+   (vector? bindings) "a vector for its binding"
+   (even? (count bindings)) "an even number of forms in binding vector")
   (cond
     (empty? bindings) `(do ~@body)
     (symbol? (bindings 0)) `(let ~(subvec bindings 0 2)
@@ -378,7 +358,7 @@
                                 (finally
                                   (.close ~(bindings 0)))))
     :else (throw (IllegalArgumentException.
-                   "with-connection-tx only allows Symbols in bindings"))))
+                  "with-connection-tx only allows Symbols in bindings"))))
 
 (defmacro with-connection-pool
   "(with-connection-pool [con pool] .. con, body ..)
@@ -388,24 +368,13 @@
    (vector? bindings) "a vector for its binding"
    (even? (count bindings)) "an even number of forms in binding vector")
   (cond
-   (empty? bindings) `(do ~@body)
-   (symbol? (bindings 0))
-  `(let [db-spec# ~(second bindings)]
-     (let [~(first bindings) (.obtain (:ds db-spec#))]
-       (try
-       ~@body
-       (finally
-        (.release (:ds db-spec#) ~(first bindings))))))
-   :else (throw (IllegalArgumentException.
-                   "with-pool only allows Symbols in bindings"))))
-
-
-
-
-
-
-
-
-
-
-
+    (empty? bindings) `(do ~@body)
+    (symbol? (bindings 0))
+    `(let [db-spec# ~(second bindings)]
+       (let [~(first bindings) (.obtain (:ds db-spec#))]
+         (try
+           ~@body
+           (finally
+             (.release (:ds db-spec#) ~(first bindings))))))
+    :else (throw (IllegalArgumentException.
+                  "with-pool only allows Symbols in bindings"))))
