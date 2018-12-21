@@ -133,12 +133,14 @@
        (fact "use a graph query with a connect"
              (with-open [c (connect test-db-spec)]
                (let [g (graph c "CONSTRUCT { <urn:test> ?p ?o } WHERE { <urn:test> ?p ?o } ")]
-                 g) => (list [(as-uri "urn:test") (as-uri "urn:test:clj:prop3") "Hello World"])))
+                 g) => (list [(as-uri "urn:test") (as-uri "urn:test:clj:prop3")
+                              "\"Hello World\"^^<http://www.w3.org/2001/XMLSchema#string>"])))
        (fact "use a graph query with converter"
              (with-open [c (connect test-db-spec)]
                (let [g (graph c "CONSTRUCT { <urn:test> ?p ?o } WHERE { <urn:test> ?p ?o } "
                               {:converter #(str %) :key-converter #(str %)})]
-                 g) => (list ["urn:test" "urn:test:clj:prop3" "\"Hello World\"^^<http://www.w3.org/2001/XMLSchema#string>"]))))
+                 g) => (list ["urn:test" "urn:test:clj:prop3"
+                              "\"Hello World\"^^<http://www.w3.org/2001/XMLSchema#string>"]))))
 
 (facts "About stardog namespace api"
        (fact "ability to add a namespace"

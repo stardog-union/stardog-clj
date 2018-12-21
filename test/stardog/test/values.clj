@@ -36,7 +36,7 @@
        (fact "Converting a java.util.Date"
              (type (convert (Date.))) => CalendarLiteral)
        (fact "LiteralImpl to String"
-             (standardize (convert "test")) => "test")
+             (standardize (convert "test")) => "\"test\"^^<http://www.w3.org/2001/XMLSchema#string>")
        (fact "CalendarImpl to java.util.Date"
              (let [d (Date.)]
              (standardize (convert d)) => d))

@@ -14,8 +14,8 @@
 ;; limitations under the License.
 
 (ns stardog.values
-  (:import [com.stardog.stark IRI Literal BNode Values]
-           [com.stardog.stark.impl IRIImpl TypedLiteral BooleanLiteral]
+  (:import [com.stardog.stark IRI Literal BNode Values Datatype]
+           [com.stardog.stark.impl IRIImpl TypedLiteral BooleanLiteral LanguageLiteral]
            [java.util Date GregorianCalendar UUID Map]
            [javax.xml.datatype DatatypeConfigurationException DatatypeFactory XMLGregorianCalendar]))
 
@@ -123,14 +123,11 @@
   (convert [v] (Values/literal (bigdec v)))
   String
   (convert [v] (Values/literal v))
-  ;; FIXME arg types to TypedLiteral do not match available constructors
-  ;; Map
-  ;; (convert [{:keys [^String value ^String lang datatype]}]
-  ;;   (let [^IRI dt (to-uri datatype)]
-  ;;     (cond lang (TypedLiteral. value lang)
-  ;;           dt (TypedLiteral. value dt)
-  ;;           :default (TypedLiteral. value))))
-  )
+  Map
+  (convert [{:keys [^String value ^String lang datatype]}]
+    (cond lang     (LanguageLiteral. value lang)
+          datatype (TypedLiteral. value (Datatype/of (to-uri datatype)))
+          :default (TypedLiteral. value, Datatype/UDF))))
 
 (defprotocol ClojureConverter
   (standardize [v] "Standardizes a value into something Idiomatic for Clojure"))
