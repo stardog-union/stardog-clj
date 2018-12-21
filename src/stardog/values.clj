@@ -57,7 +57,7 @@
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#short"
   [^Literal v] (.shortValue v))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#string"
-  [^Literal v] (.toString v))
+  [^Literal v] (.label v))
 (defmethod typed-value :default
   [^Literal v]
   (let [label (.label v)]
@@ -127,7 +127,7 @@
   (convert [{:keys [^String value ^String lang datatype]}]
     (cond lang     (LanguageLiteral. value lang)
           datatype (TypedLiteral. value (Datatype/of (to-uri datatype)))
-          :default (TypedLiteral. value, Datatype/UDF))))
+          :default (TypedLiteral. value Datatype/UDF))))
 
 (defprotocol ClojureConverter
   (standardize [v] "Standardizes a value into something Idiomatic for Clojure"))
