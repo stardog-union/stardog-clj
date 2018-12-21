@@ -1,31 +1,26 @@
- ; Copyright (C) 2014 Paula Gearon
- ; Copyright (C) 2014 Clark & Parsia
- ;
- ; Licensed under the Apache License, Version 2.0 (the "License");
- ; you may not use this file except in compliance with the License.
- ; You may obtain a copy of the License at
- ;
- ;      http://www.apache.org/licenses/LICENSE-2.0
- ;
- ; Unless required by applicable law or agreed to in writing, software
- ; distributed under the License is distributed on an "AS IS" BASIS,
- ; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- ; See the License for the specific language governing permissions and
- ; limitations under the License.
+;; Copyright (C) 2014 Paula Gearon
+;; Copyright (C) 2014 Clark & Parsia
+;;
+;; Licensed under the Apache License, Version 2.0 (the "License");
+;; you may not use this file except in compliance with the License.
+;; You may obtain a copy of the License at
+;;
+;;      http://www.apache.org/licenses/LICENSE-2.0
+;;
+;; Unless required by applicable law or agreed to in writing, software
+;; distributed under the License is distributed on an "AS IS" BASIS,
+;; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+;; See the License for the specific language governing permissions and
+;; limitations under the License.
 
 (ns stardog.values
-  (:import [org.openrdf.model URI Literal BNode Value]
-           [org.openrdf.model.impl CalendarLiteral
-                                   IntegerLiteral
-                                   LiteralImpl
-                                   BooleanLiteral
-                                   NumericLiteral
-                                   URIImpl]
-           [com.complexible.common.rdf.model Values]
+  (:import [com.stardog.stark IRI Literal BNode Values Datatype]
+           [com.stardog.stark.impl IRIImpl TypedLiteral BooleanLiteral LanguageLiteral]
            [java.util Date GregorianCalendar UUID Map]
            [javax.xml.datatype DatatypeConfigurationException DatatypeFactory XMLGregorianCalendar]))
 
-(defmulti typed-value (fn [^Literal v] (str (.getDatatype v))))
+
+(defmulti typed-value (fn [^Literal v] (.. v datatype toString)))
 
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#integer"
   [^Literal v] (.intValue v))
@@ -36,21 +31,21 @@
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#byte"
   [^Literal v] (.byteValue v))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#dateTime"
-  [^Literal v] (-> (.calendarValue v) (.toGregorianCalendar) (.getTime)))
+  [^Literal v] (.. v calendarValue toGregorianCalendar getTime))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#time"
-  [^Literal v] (-> (.calendarValue v) (.toGregorianCalendar) (.getTime)))
+  [^Literal v] (.. v calendarValue toGregorianCalendar getTime))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#date"
-  [^Literal v] (-> (.calendarValue v) (.toGregorianCalendar) (.getTime)))
+  [^Literal v] (.. v calendarValue toGregorianCalendar getTime))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#gYearMonth"
-  [^Literal v] (-> (.calendarValue v) (.toGregorianCalendar) (.getTime)))
+  [^Literal v] (.. v calendarValue toGregorianCalendar getTime))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#gMonthYear"
-  [^Literal v] (-> (.calendarValue v) (.toGregorianCalendar) (.getTime)))
+  [^Literal v] (.. v calendarValue toGregorianCalendar getTime))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#gYear"
-  [^Literal v] (-> (.calendarValue v) (.toGregorianCalendar) (.getTime)))
+  [^Literal v] (.. v calendarValue toGregorianCalendar getTime))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#gMonth"
-  [^Literal v] (-> (.calendarValue v) (.toGregorianCalendar) (.getTime)))
+  [^Literal v] (.. v calendarValue toGregorianCalendar getTime))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#gDay"
-  [^Literal v] (-> (.calendarValue v) (.toGregorianCalendar) (.getTime)))
+  [^Literal v] (.. v calendarValue toGregorianCalendar getTime))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#decimal"
   [^Literal v] (.decimalValue v))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#double"
@@ -62,14 +57,13 @@
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#short"
   [^Literal v] (.shortValue v))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#string"
-  [^Literal v] (.stringValue v))
+  [^Literal v] (.label v))
 (defmethod typed-value :default
   [^Literal v]
-  (let [lang (.getLanguage v)
-        label (.getLabel v)]
-    (if lang
+  (let [label (.label v)]
+    (if-let [lang (.lang v)]
       {:lang lang :value label}
-      (if-let [dt (.getDatatype v)]
+      (if-let [dt (.datatype v)]
         {:datatype dt :value label}
         label))))
 
@@ -80,12 +74,12 @@
   nil
   (to-uri [u] u)
   String
-  (to-uri [u] (URIImpl. u))
+  (to-uri [u] (IRIImpl. u))
   java.net.URI
-  (to-uri [u] (URIImpl. (str u)))
+  (to-uri [u] (IRIImpl. (str u)))
   java.net.URL
-  (to-uri [u] (URIImpl. (str u)))
-  org.openrdf.model.URI
+  (to-uri [u] (IRIImpl. (str u)))
+  IRI
   (to-uri [u] u))
 
 (defprotocol RDFConverter
@@ -131,16 +125,15 @@
   (convert [v] (Values/literal v))
   Map
   (convert [{:keys [^String value ^String lang datatype]}]
-    (let [^org.openrdf.model.URI dt (to-uri datatype)]
-      (cond lang (LiteralImpl. value lang)
-            dt (LiteralImpl. value dt)
-            :default (LiteralImpl. value)))))
+    (cond lang     (LanguageLiteral. value lang)
+          datatype (TypedLiteral. value (Datatype/of (to-uri datatype)))
+          :default (TypedLiteral. value Datatype/UDF))))
 
 (defprotocol ClojureConverter
   (standardize [v] "Standardizes a value into something Idiomatic for Clojure"))
 
 (extend-protocol ClojureConverter
-  org.openrdf.model.URI
+  IRI
   (standardize [v] (let [u (str v)]
                      (if (.startsWith u "urn:uuid:")
                        (UUID/fromString (subs u 9))
