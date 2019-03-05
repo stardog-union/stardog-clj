@@ -23,13 +23,13 @@
 (defmulti typed-value (fn [^Literal v] (.. v datatype toString)))
 
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#integer"
-  [^Literal v] (.intValue v))
+  [^Literal v] (Literal/intValue v))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#int"
-  [^Literal v] (.intValue v))
+  [^Literal v] (Literal/intValue v))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#boolean"
-  [^Literal v] (.booleanValue v))
+  [^Literal v] (Literal/booleanValue v))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#byte"
-  [^Literal v] (.byteValue v))
+  [^Literal v] (Literal/byteValue v))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#dateTime"
   [^Literal v] (.. v calendarValue toGregorianCalendar getTime))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#time"
@@ -47,15 +47,15 @@
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#gDay"
   [^Literal v] (.. v calendarValue toGregorianCalendar getTime))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#decimal"
-  [^Literal v] (.decimalValue v))
+  [^Literal v] (Literal/decimalValue v))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#double"
-  [^Literal v] (.doubleValue v))
+  [^Literal v] (Literal/doubleValue v))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#float"
-  [^Literal v] (.floatValue v))
+  [^Literal v] (Literal/floatValue v))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#long"
-  [^Literal v] (.longValue v))
+  [^Literal v] (Literal/longValue v))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#short"
-  [^Literal v] (.shortValue v))
+  [^Literal v] (Literal/shortValue v))
 (defmethod typed-value "http://www.w3.org/2001/XMLSchema#string"
   [^Literal v] (.label v))
 (defmethod typed-value :default

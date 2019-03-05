@@ -13,7 +13,7 @@
 ;; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
-(defproject stardog-clj "6.0.1"
+(defproject stardog-clj "6.0.2"
   :description "Stardog-clj: Clojure bindings for Stardog"
   :url "http://stardog.com"
   :license {:name "Apache License"
