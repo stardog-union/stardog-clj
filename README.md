@@ -15,7 +15,7 @@ Stardog-clj - Clojure language bindings to use to develop apps with the [Stardog
 To use stardog-clj, follow these simple steps:
 
 1. Download [Stardog](http://stardog.com), and unzip it
-2. In your application, add the stardog-clj dependency to your project.clj file, or equivalent build tool.  For example, `[stardog-clj "5.0.0-RC1"]`
+2. In your application, add the stardog-clj dependency to your project.clj file, or equivalent build tool.  For example, `[stardog-clj "6.2.1"]`
 3. In your application, create a database specification `(create-db-spec database "http://localhost:5820/" "admin" "admin" true)`
 4. You can use this specification to make a connection pool with `(make-datasource spec)`
 5. Use `(with-connection-pool [conn datasource])` to start using the connection pool
@@ -99,7 +99,7 @@ The test suite does run with the assumption there is a Stardog database server r
 
 ## License
 
-Copyright 2014, 2015, 2016, 2017 Stardog Union
+Copyright 2014, 2015, 2016, 2017, 2018, 2019 Stardog Union
 
 Copyright 2014 Paula Gearon
 

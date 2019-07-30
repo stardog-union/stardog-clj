@@ -1,4 +1,4 @@
-;; Copyright (C) 2016-2018 Stardog Union
+;; Copyright (C) 2016-2019 Stardog Union
 ;; Copyright (C) 2014-2015 Clark & Parsia
 ;; Copyright (C) 2014 Paula Gearon
 ;;
@@ -13,15 +13,18 @@
 ;; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
-(defproject stardog-clj "6.0.2"
+(require 'cemerick.pomegranate.aether)
+(cemerick.pomegranate.aether/register-wagon-factory!
+ "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
+(defproject stardog-clj "6.2.1"
   :description "Stardog-clj: Clojure bindings for Stardog"
   :url "http://stardog.com"
   :license {:name "Apache License"
             :url "http://www.apache.org/licenses/LICENSE-2.0"}
-  :dependencies [[org.clojure/clojure "1.8.0"]
-                 [com.complexible.stardog/client-http "6.0.1" :extension "pom"]]
+  :dependencies [[org.clojure/clojure "1.9.0"]
+                 [com.complexible.stardog/client-http "6.2.1" :extension "pom"]]
   :repositories [["stardog" "http://maven.stardog.com"]]
-  :plugins [[jonase/eastwood "0.0.2"]
-            [lein-midje "3.1.3"]]
-  :profiles {:dev {:dependencies [[midje "1.6.3"]]
-                   :plugins [[lein-midje "3.1.3"]]}} )
+  :plugins [[jonase/eastwood "0.3.6"]
+            [lein-midje "3.2"]]
+  :profiles {:dev {:dependencies [[midje "1.9.9"]]
+                   :plugins [[lein-midje "3.2"]]}})
