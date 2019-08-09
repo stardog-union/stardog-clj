@@ -16,13 +16,13 @@
 (require 'cemerick.pomegranate.aether)
 (cemerick.pomegranate.aether/register-wagon-factory!
  "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
-(defproject stardog-clj "6.2.1"
+(defproject stardog-clj "7.0.0"
   :description "Stardog-clj: Clojure bindings for Stardog"
   :url "http://stardog.com"
   :license {:name "Apache License"
             :url "http://www.apache.org/licenses/LICENSE-2.0"}
   :dependencies [[org.clojure/clojure "1.9.0"]
-                 [com.complexible.stardog/client-http "6.2.1" :extension "pom"]]
+                 [com.complexible.stardog/client-http "7.0.0" :extension "pom"]]
   :repositories [["stardog" "http://maven.stardog.com"]]
   :plugins [[jonase/eastwood "0.3.6"]
             [lein-midje "3.2"]]
