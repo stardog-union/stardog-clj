@@ -21,7 +21,7 @@
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [com.complexible.stardog/client-http "7.2.0" :extension "pom"]]
   :repositories [["stardog" "https://maven.stardog.com"]]
-  :plugins [[jonase/eastwood "0.3.6"]
-            [lein-midje "3.2"]]
+  :plugins [[jonase/eastwood "0.3.10"]
+            [lein-midje "3.2.2"]]
   :profiles {:dev {:dependencies [[midje "1.9.9"]]
-                   :plugins [[lein-midje "3.2"]]}})
+                   :plugins [[lein-midje "3.2.2"]]}})
