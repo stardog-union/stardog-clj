@@ -149,4 +149,4 @@
                (remove-ns! c "myns") => truthy))
        (fact "list namespaces"
              (with-open [c (connect test-db-spec)]
-               (count (list-namespaces c)) => 96)))
+               (count (list-namespaces c)) => 98)))
