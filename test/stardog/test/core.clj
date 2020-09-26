@@ -60,6 +60,9 @@
        (fact "Insert a vector representing a triple"
              (with-open [c (connect test-db-spec)]
                (with-transaction [c] (remove! c ["urn:test" "urn:test:clj:prop" "Hello World"]))) => truthy)
+       (fact "Insert a vector representing a triple into a named graph"
+             (with-open [c (connect test-db-spec)]
+               (with-transaction [c] (remove! c ["urn:test" "urn:test:clj:prop" "Hello World"] "urn:test:graph"))) => truthy)
        (fact "Attempting to insert a partial statement throws IllegalArgumentException"
              (with-open [c (connect test-db-spec)]
                (with-transaction [c] (insert! c ["urn:test" "urn:test:clj:prop"]))) => (throws IllegalArgumentException))
@@ -68,13 +71,25 @@
                (with-transaction [c]
                  (insert! c ["urn:test" "urn:test:clj:prop2" "Hello World"])
                  (insert! c ["urn:test" "urn:test:clj:prop2" "Hello World2"]))
-               (count (query c "select ?s ?p ?o WHERE { ?s <urn:test:clj:prop2> ?o } LIMIT 5")) => 2) )
-       (fact "Multiple inserts in a tx"
+               (count (query c "select ?s ?p ?o WHERE { ?s <urn:test:clj:prop2> ?o } LIMIT 5")) => 2))
+       (fact "Multiple inserts into a named graph in a tx"
+             (with-open [c (connect test-db-spec)]
+               (with-transaction [c]
+                 (insert! c ["urn:test" "urn:test:clj:prop2" "Hello World"] "urn:test:graph")
+                 (insert! c ["urn:test" "urn:test:clj:prop2" "Hello World2"] "urn:test:graph"))
+               (count (query c "select ?s ?p ?o WHERE { GRAPH <urn:test:graph> { ?s <urn:test:clj:prop2> ?o }} LIMIT 5")) => 2))
+       (fact "Multiple removes in a tx"
              (with-open [c (connect test-db-spec)]
                (with-transaction [c]
                  (remove! c ["urn:test" "urn:test:clj:prop2" "Hello World"])
                  (remove! c ["urn:test" "urn:test:clj:prop2" "Hello World2"]))
-               (count (query c "select ?s ?p ?o WHERE { ?s <urn:test:clj:prop2> ?o } LIMIT 5")) => 0) ))
+               (count (query c "select ?s ?p ?o WHERE { ?s <urn:test:clj:prop2> ?o } LIMIT 5")) => 0))
+       (fact "Multiple removes from a named graph in a tx"
+             (with-open [c (connect test-db-spec)]
+               (with-transaction [c]
+                 (remove! c ["urn:test" "urn:test:clj:prop2" "Hello World"] "urn:test:graph")
+                 (remove! c ["urn:test" "urn:test:clj:prop2" "Hello World2"] "urn:test:graph"))
+               (count (query c "select ?s ?p ?o WHERE { GRAPH <urn:test:graph> {?s <urn:test:clj:prop2> ?o }} LIMIT 5")) => 0)))
 
 
 (facts "About query converter handling"
@@ -126,7 +141,7 @@
                          (fn [conn]
                            (insert! conn ["urn:test" "urn:test:clj:prop3" "Hello World"])))
                (with-connection-pool [c ds]
-                 (count (query c "select ?s ?p ?o WHERE { ?s <urn:test:clj:prop3> ?o } LIMIT 5")) => 1) )))
+                 (count (query c "select ?s ?p ?o WHERE { ?s <urn:test:clj:prop3> ?o } LIMIT 5")) => 1))))
 
 
 (facts "About running a construct query"
@@ -149,4 +164,4 @@
                (remove-ns! c "myns") => truthy))
        (fact "list namespaces"
              (with-open [c (connect test-db-spec)]
-               (count (list-namespaces c)) => 98)))
+               (count (list-namespaces c)) => 96)))
