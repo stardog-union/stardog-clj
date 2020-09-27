@@ -260,7 +260,7 @@
          subj (-> (first triple-list) (values/as-uri) (values/convert))
          pred (-> (second triple-list) (values/as-uri) (values/convert))
          obj  (-> (nth triple-list 2) (values/convert))
-         context (if (= graph-uri Values/DEFAULT_GRAPH)
+         context (if (instance? com.stardog.stark.impl.IRIImpl graph-uri)
                    graph-uri
                    (values/convert (values/as-uri graph-uri)))]
      (.statement adder (StatementImpl. subj pred obj context)))))
@@ -275,7 +275,7 @@
          subj (-> (first triple-list) (values/as-uri) (values/convert))
          pred (-> (second triple-list) (values/as-uri) (values/convert))
          obj  (-> (nth triple-list 2) (values/convert))
-         context (if (= graph-uri Values/DEFAULT_GRAPH)
+         context (if (instance? com.stardog.stark.impl.IRIImpl graph-uri)
                   graph-uri
                   (values/convert (values/as-uri graph-uri)))]
      (.statement remover (StatementImpl. subj pred obj context)))))
