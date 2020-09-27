@@ -64,11 +64,11 @@
   [db-spec]
   (let [{:keys [url user pass db
                 max-idle min-pool max-pool reasoning]} db-spec
-        con-config (-> (ConnectionConfiguration/to db )
+        con-config (-> (ConnectionConfiguration/to db)
                        (.server url)
                        (.credentials user pass)
-                       (.reasoning reasoning)
-                       )
+                       (.reasoning reasoning))
+                       
         pool-config (-> (ConnectionPoolConfig/using con-config)
                         (.minPool min-pool)
                         (.maxIdle max-idle)
@@ -252,23 +252,33 @@
 
 (defn insert!
   "Inserts a statement (subject, predicate, object) represented as a 3 item vector"
-  [^Connection connection triple-list]
-  (when (< (count triple-list) 3) (throw (IllegalArgumentException. "triple-list must have 3 elements")))
-  (let [adder (.add connection)
-        subj (-> (first triple-list) (values/as-uri) (values/convert) )
-        pred (-> (second triple-list) (values/as-uri) (values/convert))
-        obj  (-> (nth triple-list 2) (values/convert))]
-    (.statement adder (StatementImpl. subj pred obj Values/DEFAULT_GRAPH))))
+  ([^Connection connection triple-list]
+   (insert! connection triple-list Values/DEFAULT_GRAPH))
+  ([^Connection connection triple-list graph-uri]
+   (when (< (count triple-list) 3) (throw (IllegalArgumentException. "triple-list must have 3 elements")))
+   (let [adder (.add connection)
+         subj (-> (first triple-list) (values/as-uri) (values/convert))
+         pred (-> (second triple-list) (values/as-uri) (values/convert))
+         obj  (-> (nth triple-list 2) (values/convert))
+         context (if (instance? com.stardog.stark.impl.IRIImpl graph-uri)
+                   graph-uri
+                   (values/convert (values/as-uri graph-uri)))]
+     (.statement adder (StatementImpl. subj pred obj context)))))
 
 (defn remove!
   "Removes a statements (subject, predicate, object) represented as a 3 item vector"
-  [^Connection connection triple-list]
-  (when (< (count triple-list) 3) (throw (IllegalArgumentException. "triple-list must have 3 elements")))
-  (let [remover (.remove connection)
-        subj (-> (first triple-list) (values/as-uri) (values/convert))
-        pred (-> (second triple-list) (values/as-uri) (values/convert))
-        obj  (-> (nth triple-list 2) (values/convert))]
-    (.statement remover (StatementImpl. subj pred obj Values/DEFAULT_GRAPH))))
+  ([^Connection connection triple-list]
+   (remove! connection triple-list Values/DEFAULT_GRAPH))
+  ([^Connection connection triple-list graph-uri]
+   (when (< (count triple-list) 3) (throw (IllegalArgumentException. "triple-list must have 3 elements")))
+   (let [remover (.remove connection)
+         subj (-> (first triple-list) (values/as-uri) (values/convert))
+         pred (-> (second triple-list) (values/as-uri) (values/convert))
+         obj  (-> (nth triple-list 2) (values/convert))
+         context (if (instance? com.stardog.stark.impl.IRIImpl graph-uri)
+                  graph-uri
+                  (values/convert (values/as-uri graph-uri)))]
+     (.statement remover (StatementImpl. subj pred obj context)))))
 
 (defn add-ns!
   "Adds a namespace prefix"
