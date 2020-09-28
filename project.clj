@@ -13,13 +13,13 @@
 ;; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
-(defproject stardog-clj "7.3.0"
+(defproject stardog-clj "7.4.0"
   :description "Stardog-clj: Clojure bindings for Stardog"
   :url "http://stardog.com"
   :license {:name "Apache License"
             :url "http://www.apache.org/licenses/LICENSE-2.0"}
   :dependencies [[org.clojure/clojure "1.9.0"]
-                 [com.complexible.stardog/client-http "7.3.0" :extension "pom"]
+                 [com.complexible.stardog/client-http "7.4.0" :extension "pom"]
                  [org.clojure/tools.logging "1.1.0"]
                  [ch.qos.logback/logback-classic "1.2.3"]]
   :repositories [["stardog" "https://maven.stardog.com"]]
