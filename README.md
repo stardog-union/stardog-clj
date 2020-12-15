@@ -1,27 +1,24 @@
 # stardog-clj
 
-Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
-
-[![Clojars Project](http://clojars.org/stardog-clj/latest-version.svg)](http://clojars.org/stardog-clj)
-
-
-Stardog-clj - Clojure language bindings to use to develop apps with the [Stardog Graph / RDF Database](http://stardog.com).
+Clojure language bindings to use to develop apps with the [Stardog Graph / RDF Database](http://stardog.com).
 
 ![Stardog](http://stardog.com/img/stardog.png)
 
+Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+[![Clojars Project](http://clojars.org/stardog-clj/latest-version.svg)](http://clojars.org/stardog-clj)
 
 ## Usage
 
 To use stardog-clj, follow these simple steps:
 
-1. Download [Stardog](http://stardog.com), and unzip it
+1. Install Stardog. See [Getting Stardog](https://www.stardog.com/docs/#_getting_stardog) for details.
 2. In your application, add the stardog-clj dependency to your project.clj file, or equivalent build tool.  For example, `[stardog-clj "7.4.0"]`
 3. In your application, create a database specification `(create-db-spec database "http://localhost:5820/" "admin" "admin" true)`
 4. You can use this specification to make a connection pool with `(make-datasource spec)`
 5. Use `(with-connection-pool [conn datasource])` to start using the connection pool
 
 Out of the box, Stardog provides a Java API, SNARL, for communicating with the Stardog database.  SNARL is a connection oriented API, with both a connection and connection pool available, similar to JDBC.  Queries can be made using the SPARQL query language, or by using various SNARL APIs for navigating the structure of the data. Stardog-clj provides APIs to do all of these functions using idiomatic clojure style of programming.  The API builds upon itself, being able to wrap usage with connection pools, create connections directly, etc.
-
 
 ### Query Execution
 
@@ -89,13 +86,16 @@ Note: the usual `with-open` macro closes a connection, which is not recommended 
 
 To build stardog-clj, you must perform the following steps:
 
-1. Download stardog from [Stardog.com](http://www.stardog.com)
-2. Run "stardog-admin server start"
-3. Run "stardog-admin db create -n testdb path/to/data/University0_0.owl path/to/data/lubmSchema.owl"
-4. You can now run lein compile, use the lein repl, and run lein midje to perform the tests
+1. Install Stardog. See [Getting Stardog](https://www.stardog.com/docs/#_getting_stardog) for details.
+2. Run `[Stardog install dir]/bin/stardog-admin server start`
+3. Run `[Stardog install dir]/bin/stardog-admin db create -n testdb [path/to/data/]University0_0.owl [path/to/data/]lubmSchema.owl`
+4. Run `lein compile` to build the library.
+ 
+You can run a REPL by running `lein repl`.
+
+You can run the tests by running `lein midje`
 
 The test suite does run with the assumption there is a Stardog database server running.
-
 
 ## License
 
