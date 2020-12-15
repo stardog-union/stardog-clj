@@ -266,19 +266,22 @@
      (.statement adder (StatementImpl. subj pred obj context)))))
 
 (defn remove!
-  "Removes a statements (subject, predicate, object) represented as a 3 item vector"
+  "Remove a statement from the database; nil's can be used in any position to
+  indicate a wildcard matching anything in that position, thereby removing multiple statements.
+  If a graph URI is specified, all statements matching the given SPO pattern will be removed
+  from the named graph."
   ([^Connection connection triple-list]
    (remove! connection triple-list Values/DEFAULT_GRAPH))
   ([^Connection connection triple-list graph-uri]
    (when (< (count triple-list) 3) (throw (IllegalArgumentException. "triple-list must have 3 elements")))
    (let [remover (.remove connection)
-         subj (-> (first triple-list) (values/as-uri) (values/convert))
-         pred (-> (second triple-list) (values/as-uri) (values/convert))
-         obj  (-> (nth triple-list 2) (values/convert))
+         subj (when (some? (first triple-list)) (-> triple-list first (values/as-uri) (values/convert)))
+         pred (when (some? (second triple-list)) (-> triple-list second (values/as-uri) (values/convert)))
+         obj  (when (some? (nth triple-list 2)) (-> (nth triple-list 2) (values/convert)))
          context (if (instance? com.stardog.stark.impl.IRIImpl graph-uri)
-                  graph-uri
-                  (values/convert (values/as-uri graph-uri)))]
-     (.statement remover (StatementImpl. subj pred obj context)))))
+                   graph-uri
+                   (values/convert (values/as-uri graph-uri)))]
+     (.statements remover subj pred obj (into-array com.stardog.stark.Resource [context])))))
 
 (defn add-ns!
   "Adds a namespace prefix"
