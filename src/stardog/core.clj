@@ -68,7 +68,7 @@
                        (.server url)
                        (.credentials user pass)
                        (.reasoning reasoning))
-                       
+
         pool-config (-> (ConnectionPoolConfig/using con-config)
                         (.minPool min-pool)
                         (.maxIdle max-idle)
@@ -274,15 +274,33 @@
   ([^Connection connection triple-list]
    (remove! connection triple-list Values/DEFAULT_GRAPH))
   ([^Connection connection triple-list graph-uri]
-   (when (< (count triple-list) 3) (throw (IllegalArgumentException. "triple-list must have 3 elements")))
    (let [remover (.remove connection)
          subj (when (some? (first triple-list)) (-> triple-list first (values/as-uri) (values/convert)))
          pred (when (some? (second triple-list)) (-> triple-list second (values/as-uri) (values/convert)))
-         obj  (when (some? (nth triple-list 2)) (-> (nth triple-list 2) (values/convert)))
+         obj  (when (some? (nth triple-list 2 nil)) (-> (nth triple-list 2) (values/convert)))
          context (if (instance? com.stardog.stark.impl.IRIImpl graph-uri)
                    graph-uri
                    (values/convert (values/as-uri graph-uri)))]
      (.statements remover subj pred obj (into-array com.stardog.stark.Resource [context])))))
+
+(defn remove-named-graph!
+  "Remove the named graph and all the statements within from the database. If no graph URI is provided
+  this will remove the default graph (no context). If you want to remove everything in the database
+  regardless of context, use remove-all!."
+  ([^Connection connection]
+   (remove! connection Values/DEFAULT_GRAPH))
+  ([^Connection connection graph-uri]
+   (let [remover (.remove connection)
+         context (if (instance? com.stardog.stark.impl.IRIImpl graph-uri)
+                   graph-uri
+                   (values/convert (values/as-uri graph-uri)))]
+     (.context remover context))))
+
+(defn remove-all!
+  "Delete the entire contents of the database."
+  ([^Connection connection]
+   (let [remover (.remove connection)]
+     (.all remover))))
 
 (defn add-ns!
   "Adds a namespace prefix"
