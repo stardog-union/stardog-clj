@@ -57,10 +57,13 @@
        (fact "Insert a vector representing a triple"
              (with-open [c (connect test-db-spec)]
                (with-transaction [c] (insert! c ["urn:test" "urn:test:clj:prop" "Hello World"]))) => truthy)
-       (fact "Insert a vector representing a triple"
+       (fact "Remove a vector representing a triple"
              (with-open [c (connect test-db-spec)]
                (with-transaction [c] (remove! c ["urn:test" "urn:test:clj:prop" "Hello World"]))) => truthy)
        (fact "Insert a vector representing a triple into a named graph"
+             (with-open [c (connect test-db-spec)]
+               (with-transaction [c] (insert! c ["urn:test" "urn:test:clj:prop" "Hello World"] "urn:test:graph"))) => truthy)
+       (fact "Remove a vector representing a triple into a named graph"
              (with-open [c (connect test-db-spec)]
                (with-transaction [c] (remove! c ["urn:test" "urn:test:clj:prop" "Hello World"] "urn:test:graph"))) => truthy)
        (fact "Attempting to insert a partial statement throws IllegalArgumentException"
