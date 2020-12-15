@@ -31,6 +31,12 @@
 (def reasoning-db-spec (create-db-spec "testdb" "http://localhost:5820/" "admin" "admin" true))
 (def test-connection (connect test-db-spec))
 
+(defn cleanup [graph-uris]
+  (with-open [c (connect test-db-spec)]
+    (with-transaction [c]
+      (doseq [graph-uri graph-uris]
+        (remove-named-graph! c graph-uri)))))
+
 (facts "About stardog connection pool handling"
        (fact "create-db-spec returns a valid map"
              (create-db-spec "testdb" "http://localhost:5820/" "admin" "admin" false) =>
@@ -92,8 +98,49 @@
                (with-transaction [c]
                  (remove! c ["urn:test" "urn:test:clj:prop2" "Hello World"] "urn:test:graph")
                  (remove! c ["urn:test" "urn:test:clj:prop2" "Hello World2"] "urn:test:graph"))
-               (count (query c "select ?s ?p ?o WHERE { GRAPH <urn:test:graph> {?s <urn:test:clj:prop2> ?o }} LIMIT 5")) => 0)))
-
+               (count (query c "select ?s ?p ?o WHERE { GRAPH <urn:test:graph> {?s <urn:test:clj:prop2> ?o }} LIMIT 5")) => 0))
+       (with-state-changes [(after :facts (cleanup ["urn:test:named-graph"]))]
+         (fact "Perform wildcard predicate removals from a named graph in a tx"
+               (with-open [c (connect test-db-spec)]
+                 (with-transaction [c]
+                   (insert! c ["urn:test" "urn:test:clj:prop1" "Hello World"] "urn:test:named-graph")
+                   (insert! c ["urn:test" "urn:test:clj:prop2" "Hello World"] "urn:test:named-graph")
+                   (insert! c ["urn:test" "urn:test:clj:prop3" "Hello World"] "urn:test:named-graph")
+                   (insert! c ["urn:bar" "urn:test:clj:prop4" "Hello Foo"] "urn:test:named-graph"))
+                 (with-transaction [c]
+                   (remove! c ["urn:test" nil "Hello World"] "urn:test:named-graph"))
+                 (count (query c "select ?s ?p ?o WHERE { GRAPH <urn:test:named-graph> { ?s ?p ?o }} LIMIT 5")) => 1))
+         (fact "Perform wildcard object removals from a named graph in a tx"
+               (with-open [c (connect test-db-spec)]
+                 (with-transaction [c]
+                   (insert! c ["urn:foo" "urn:test:clj:prop1" "Hello World"] "urn:test:named-graph")
+                   (insert! c ["urn:bar" "urn:test:clj:prop2" "Hello World"] "urn:test:named-graph")
+                   (insert! c ["urn:baz" "urn:test:clj:prop3" "Hello World"] "urn:test:named-graph")
+                   (insert! c ["urn:bar" "urn:test:clj:prop2" "Hello Foo"] "urn:test:named-graph")
+                   (insert! c ["urn:bar" "urn:test:clj:prop4" "Hello Bar"] "urn:test:named-graph"))
+                 (with-transaction [c]
+                   (remove! c ["urn:bar" "urn:test:clj:prop2" nil] "urn:test:named-graph"))
+                 (count (query c "select ?s ?p ?o WHERE { GRAPH <urn:test:named-graph> { ?s ?p ?o }} LIMIT 5")) => 3))
+         (fact "Perform wildcard subject removals from a named graph in a tx"
+               (with-open [c (connect test-db-spec)]
+                 (with-transaction [c]
+                   (insert! c ["urn:foo" "urn:test:clj:prop1" "Hello World"] "urn:test:named-graph")
+                   (insert! c ["urn:bar" "urn:test:clj:prop2" "Hello World"] "urn:test:named-graph")
+                   (insert! c ["urn:baz" "urn:test:clj:prop3" "Hello World"] "urn:test:named-graph")
+                   (insert! c ["urn:qux" "urn:test:clj:prop4" "Hello Foo"] "urn:test:named-graph"))
+                 (with-transaction [c]
+                   (remove! c [nil] "urn:test:named-graph"))
+                 (count (query c "select ?s ?p ?o WHERE { GRAPH <urn:test:named-graph> { ?s ?p ?o }} LIMIT 5")) => 0))
+         (fact "Perform wildcard removals from a named graph in a tx"
+               (with-open [c (connect test-db-spec)]
+                 (with-transaction [c]
+                   (insert! c ["urn:test" "urn:test:clj:prop1" "Hello World"] "urn:test:named-graph")
+                   (insert! c ["urn:test" "urn:test:clj:prop2" "Hello World"] "urn:test:named-graph")
+                   (insert! c ["urn:test" "urn:test:clj:prop3" "Hello World"] "urn:test:named-graph")
+                   (insert! c ["urn:bar" "urn:test:clj:prop4" "Hello Foo"] "urn:test:named-graph"))
+                 (with-transaction [c]
+                   (remove! c [] "urn:test:named-graph"))
+                 (count (query c "select ?s ?p ?o WHERE { GRAPH <urn:test:named-graph> { ?s ?p ?o }} LIMIT 5")) => 0))))
 
 (facts "About query converter handling"
        (fact "Convert keys to strings"
