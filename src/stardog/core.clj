@@ -251,7 +251,8 @@
 
 
 (defn insert!
-  "Inserts a statement (subject, predicate, object) represented as a 3 item vector"
+  "Inserts a statement (subject, predicate, object) represented as a 3 item vector.
+  If a graph URI is specified, the statements will be added to the named graph."
   ([^Connection connection triple-list]
    (insert! connection triple-list Values/DEFAULT_GRAPH))
   ([^Connection connection triple-list graph-uri]
