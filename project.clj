@@ -23,7 +23,6 @@
                  [org.clojure/tools.logging "1.1.0"]
                  [ch.qos.logback/logback-classic "1.2.3"]]
   :repositories [["stardog" "https://maven.stardog.com"]]
-  :plugins [[jonase/eastwood "0.3.11"]
-            [lein-midje "3.2.2"]]
+  :plugins [[jonase/eastwood "0.3.11"]]
   :profiles {:dev {:dependencies [[midje "1.9.9"]]
                    :plugins [[lein-midje "3.2.2"]]}})
