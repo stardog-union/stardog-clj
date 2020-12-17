@@ -68,7 +68,7 @@
                        (.server url)
                        (.credentials user pass)
                        (.reasoning reasoning))
-                       
+
         pool-config (-> (ConnectionPoolConfig/using con-config)
                         (.minPool min-pool)
                         (.maxIdle max-idle)
@@ -251,7 +251,8 @@
 
 
 (defn insert!
-  "Inserts a statement (subject, predicate, object) represented as a 3 item vector"
+  "Inserts a statement (subject, predicate, object) represented as a 3 item vector.
+  If a graph URI is specified, the statements will be added to the named graph."
   ([^Connection connection triple-list]
    (insert! connection triple-list Values/DEFAULT_GRAPH))
   ([^Connection connection triple-list graph-uri]
@@ -266,19 +267,40 @@
      (.statement adder (StatementImpl. subj pred obj context)))))
 
 (defn remove!
-  "Removes a statements (subject, predicate, object) represented as a 3 item vector"
+  "Remove a statement from the database; nil's can be used in any position to
+  indicate a wildcard matching anything in that position, thereby removing multiple statements.
+  If a graph URI is specified, all statements matching the given SPO pattern will be removed
+  from the named graph."
   ([^Connection connection triple-list]
    (remove! connection triple-list Values/DEFAULT_GRAPH))
   ([^Connection connection triple-list graph-uri]
-   (when (< (count triple-list) 3) (throw (IllegalArgumentException. "triple-list must have 3 elements")))
    (let [remover (.remove connection)
-         subj (-> (first triple-list) (values/as-uri) (values/convert))
-         pred (-> (second triple-list) (values/as-uri) (values/convert))
-         obj  (-> (nth triple-list 2) (values/convert))
+         subj (when (some? (first triple-list)) (-> triple-list first (values/as-uri) (values/convert)))
+         pred (when (some? (second triple-list)) (-> triple-list second (values/as-uri) (values/convert)))
+         obj  (when (some? (nth triple-list 2 nil)) (-> (nth triple-list 2) (values/convert)))
          context (if (instance? com.stardog.stark.impl.IRIImpl graph-uri)
-                  graph-uri
-                  (values/convert (values/as-uri graph-uri)))]
-     (.statement remover (StatementImpl. subj pred obj context)))))
+                   graph-uri
+                   (values/convert (values/as-uri graph-uri)))]
+     (.statements remover subj pred obj (into-array com.stardog.stark.Resource [context])))))
+
+(defn remove-named-graph!
+  "Remove the named graph and all the statements within from the database. If no graph URI is provided
+  this will remove the default graph (no context). If you want to remove everything in the database
+  regardless of context, use remove-all!."
+  ([^Connection connection]
+   (remove! connection Values/DEFAULT_GRAPH))
+  ([^Connection connection graph-uri]
+   (let [remover (.remove connection)
+         context (if (instance? com.stardog.stark.impl.IRIImpl graph-uri)
+                   graph-uri
+                   (values/convert (values/as-uri graph-uri)))]
+     (.context remover context))))
+
+(defn remove-all!
+  "Delete the entire contents of the database."
+  ([^Connection connection]
+   (let [remover (.remove connection)]
+     (.all remover))))
 
 (defn add-ns!
   "Adds a namespace prefix"
