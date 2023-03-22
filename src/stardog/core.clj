@@ -23,6 +23,7 @@
            [clojure.lang IFn]
            [java.util Map Iterator]
            [com.complexible.stardog.reasoning.api ReasoningType]
+           [com.complexible.common.base CloseableIterator]
            [com.stardog.stark Values Namespace]
            [com.stardog.stark.query SelectQueryResult GraphQueryResult BindingSet Binding]
            [com.stardog.stark.impl StatementImpl]))
@@ -49,10 +50,11 @@
 (extend-protocol Connectable
   java.util.Map
   (connect
-    [{:keys [db user pass url server reasoning]}]
+    [{:keys [db ^String user ^String pass url server reasoning]}]
     (let [config (ConnectionConfiguration/to db)]
       (when user (.credentials config user pass))
-      (when-let [server-url (or url server)] (.server config server-url))
+      (when-let [^String server-url (or url server)]
+        (.server config server-url))
       (when reasoning (.reasoning config reasoning))
       (.connect config)))
   String
@@ -62,8 +64,8 @@
 (defn make-datasource
   "Creates a Stardog datasource, i.e. ConnectionPool"
   [db-spec]
-  (let [{:keys [url user pass db
-                max-idle min-pool max-pool reasoning]} db-spec
+  (let [{:keys [^String url ^String user ^String pass ^String db
+                ^int max-idle ^int min-pool ^int max-pool ^boolean reasoning]} db-spec
         con-config (-> (ConnectionConfiguration/to db)
                        (.server url)
                        (.credentials user pass)
@@ -96,7 +98,7 @@
 
 (defn key-map-results
   "Converts a Iteration of bindings into a seq of keymaps."
-  [^IFn keyfn ^IFn valfn ^Iterator results]
+  [^IFn keyfn ^IFn valfn ^CloseableIterator results]
   (let [mapper (partial binding->map keyfn valfn)
         realized-results (into [] (map mapper) (iterator-seq results))]
     (.close results)
@@ -104,7 +106,7 @@
 
 (defn vector-map-results
   "Converts a Graph of statements into a seq of vectors."
-  [^IFn valfn ^Iterator results]
+  [^IFn valfn ^CloseableIterator results]
   (let [mapper (partial statement->map valfn)
         realized-results (into [] (map mapper) (iterator-seq results))]
     (.close results)
