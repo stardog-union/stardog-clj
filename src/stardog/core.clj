@@ -74,7 +74,7 @@
         pool-config (-> (ConnectionPoolConfig/using con-config)
                         (.minPool min-pool)
                         (.maxIdle max-idle)
-                        (.minPool min-pool))
+                        (.maxPool max-pool))
         pool (.create pool-config)]
     {:ds pool}))
 
