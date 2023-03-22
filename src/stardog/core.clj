@@ -323,8 +323,9 @@
 (defn transact
   "(transact pool (something con ..))
   Executes a function over a connection pool and transaction"
-  [pool func]
-  (let [conn (.obtain (:ds pool))
+  [datasource func]
+  (let [^ConnectionPool connection-pool (:ds datasource)
+        ^Connection conn (.obtain connection-pool)
         _ (.begin conn)]
     (try
       (let [result (func conn)]
@@ -333,7 +334,7 @@
       (catch Throwable t
         (.rollback conn))
       (finally
-        (.release (:ds pool) conn)))))
+        (.release connection-pool conn)))))
 
 
 (defmacro assert-args
@@ -393,7 +394,7 @@
                   "with-connection-tx only allows Symbols in bindings"))))
 
 (defmacro with-connection-pool
-  "(with-connection-pool [con pool] .. con, body ..)
+  "(with-connection-pool [con datasource] .. con, body ..)
    Evaluates body in the context of an active connection"
   [bindings & body]
   (assert-args
@@ -402,11 +403,13 @@
   (cond
     (empty? bindings) `(do ~@body)
     (symbol? (bindings 0))
-    `(let [db-spec# ~(second bindings)]
-       (let [~(first bindings) (.obtain (:ds db-spec#))]
+    `(let [datasource# ~(second bindings)
+           ^ConnectionPool connection-pool# (:ds datasource#)]
+       (let
+           [~(first bindings) (.obtain connection-pool#)]
          (try
            ~@body
            (finally
-             (.release (:ds db-spec#) ~(first bindings))))))
+             (.release connection-pool# ~(first bindings))))))
     :else (throw (IllegalArgumentException.
                   "with-pool only allows Symbols in bindings"))))
