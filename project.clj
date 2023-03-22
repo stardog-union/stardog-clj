@@ -19,7 +19,7 @@
   :license {:name "Apache License"
             :url "http://www.apache.org/licenses/LICENSE-2.0"}
   :dependencies [[org.clojure/clojure "1.10.3"]
-                 [com.complexible.stardog/client-http "7.8.2" :extension "pom"]
+                 [com.complexible.stardog/client-http "9.0.0" :extension "pom"]
                  [org.clojure/tools.logging "1.1.0"]
                  [com.google.guava/guava "31.0.1-jre"]
                  [ch.qos.logback/logback-classic "1.2.6"]]
