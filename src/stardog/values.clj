@@ -141,7 +141,7 @@
   Literal
   (standardize [v] (typed-value v))
   BNode
-  (standardize [v] (keyword "_" (str "b" (.getID v)))))
+  (standardize [v] (keyword "_" (str "b" (.id v))))
 
   CalendarLiteral
   (standardize [v]

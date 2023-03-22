@@ -42,7 +42,10 @@
              (standardize (convert d)) => d))
        (fact "UUID to UUID"
              (let [u (UUID/randomUUID)]
-             (standardize (convert u)) => u)))
+               (standardize (convert u)) => u))
+       (fact "Bnode to Keyword"
+             (let [b (com.stardog.stark.impl.BNodeImpl. "test")]
+               (standardize b) => :_/btest)))
 
 (facts "URI Creation"
        (fact "Creating a URI from a String"
