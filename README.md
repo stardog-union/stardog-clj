@@ -13,7 +13,7 @@ Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/
 To use stardog-clj, follow these simple steps:
 
 1. Install Stardog. See [Getting Stardog](https://www.stardog.com/docs/#_getting_stardog) for details.
-2. In your application, add the stardog-clj dependency to your project.clj file, or equivalent build tool.  For example, `[stardog-clj "7.8.2"]`
+2. In your application, add the stardog-clj dependency to your project.clj file, or equivalent build tool.  For example, `[stardog-clj "9.0.0"]`
 3. In your application, create a database specification `(create-db-spec database "http://localhost:5820/" "admin" "admin" true)`
 4. You can use this specification to make a connection pool with `(make-datasource spec)`
 5. Use `(with-connection-pool [conn datasource])` to start using the connection pool
