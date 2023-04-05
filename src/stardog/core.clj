@@ -23,6 +23,7 @@
            [clojure.lang IFn]
            [java.util Map Iterator]
            [com.complexible.stardog.reasoning.api ReasoningType]
+           [com.complexible.common.base CloseableIterator]
            [com.stardog.stark Values Namespace]
            [com.stardog.stark.query SelectQueryResult GraphQueryResult BindingSet Binding]
            [com.stardog.stark.impl StatementImpl]))
@@ -49,10 +50,11 @@
 (extend-protocol Connectable
   java.util.Map
   (connect
-    [{:keys [db user pass url server reasoning]}]
+    [{:keys [db ^String user ^String pass url server reasoning]}]
     (let [config (ConnectionConfiguration/to db)]
       (when user (.credentials config user pass))
-      (when-let [server-url (or url server)] (.server config server-url))
+      (when-let [^String server-url (or url server)]
+        (.server config server-url))
       (when reasoning (.reasoning config reasoning))
       (.connect config)))
   String
@@ -62,8 +64,8 @@
 (defn make-datasource
   "Creates a Stardog datasource, i.e. ConnectionPool"
   [db-spec]
-  (let [{:keys [url user pass db
-                max-idle min-pool max-pool reasoning]} db-spec
+  (let [{:keys [^String url ^String user ^String pass ^String db
+                ^int max-idle ^int min-pool ^int max-pool ^boolean reasoning]} db-spec
         con-config (-> (ConnectionConfiguration/to db)
                        (.server url)
                        (.credentials user pass)
@@ -72,7 +74,7 @@
         pool-config (-> (ConnectionPoolConfig/using con-config)
                         (.minPool min-pool)
                         (.maxIdle max-idle)
-                        (.minPool min-pool))
+                        (.maxPool max-pool))
         pool (.create pool-config)]
     {:ds pool}))
 
@@ -96,7 +98,7 @@
 
 (defn key-map-results
   "Converts a Iteration of bindings into a seq of keymaps."
-  [^IFn keyfn ^IFn valfn ^Iterator results]
+  [^IFn keyfn ^IFn valfn ^CloseableIterator results]
   (let [mapper (partial binding->map keyfn valfn)
         realized-results (into [] (map mapper) (iterator-seq results))]
     (.close results)
@@ -104,7 +106,7 @@
 
 (defn vector-map-results
   "Converts a Graph of statements into a seq of vectors."
-  [^IFn valfn ^Iterator results]
+  [^IFn valfn ^CloseableIterator results]
   (let [mapper (partial statement->map valfn)
         realized-results (into [] (map mapper) (iterator-seq results))]
     (.close results)
@@ -323,8 +325,9 @@
 (defn transact
   "(transact pool (something con ..))
   Executes a function over a connection pool and transaction"
-  [pool func]
-  (let [conn (.obtain (:ds pool))
+  [datasource func]
+  (let [^ConnectionPool connection-pool (:ds datasource)
+        ^Connection conn (.obtain connection-pool)
         _ (.begin conn)]
     (try
       (let [result (func conn)]
@@ -333,7 +336,7 @@
       (catch Throwable t
         (.rollback conn))
       (finally
-        (.release (:ds pool) conn)))))
+        (.release connection-pool conn)))))
 
 
 (defmacro assert-args
@@ -393,7 +396,7 @@
                   "with-connection-tx only allows Symbols in bindings"))))
 
 (defmacro with-connection-pool
-  "(with-connection-pool [con pool] .. con, body ..)
+  "(with-connection-pool [con datasource] .. con, body ..)
    Evaluates body in the context of an active connection"
   [bindings & body]
   (assert-args
@@ -402,11 +405,13 @@
   (cond
     (empty? bindings) `(do ~@body)
     (symbol? (bindings 0))
-    `(let [db-spec# ~(second bindings)]
-       (let [~(first bindings) (.obtain (:ds db-spec#))]
+    `(let [datasource# ~(second bindings)
+           ^ConnectionPool connection-pool# (:ds datasource#)]
+       (let
+           [~(first bindings) (.obtain connection-pool#)]
          (try
            ~@body
            (finally
-             (.release (:ds db-spec#) ~(first bindings))))))
+             (.release connection-pool# ~(first bindings))))))
     :else (throw (IllegalArgumentException.
                   "with-pool only allows Symbols in bindings"))))

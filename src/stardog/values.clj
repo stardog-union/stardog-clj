@@ -15,7 +15,7 @@
 
 (ns stardog.values
   (:import [com.stardog.stark IRI Literal BNode Values Datatype]
-           [com.stardog.stark.impl IRIImpl TypedLiteral BooleanLiteral LanguageLiteral]
+           [com.stardog.stark.impl CalendarLiteral IRIImpl TypedLiteral BooleanLiteral LanguageLiteral]
            [java.util Date GregorianCalendar UUID Map]
            [javax.xml.datatype DatatypeConfigurationException DatatypeFactory XMLGregorianCalendar]))
 
@@ -141,7 +141,11 @@
   Literal
   (standardize [v] (typed-value v))
   BNode
-  (standardize [v] (keyword "_" (str "b" (.getID v)))))
+  (standardize [v] (keyword "_" (str "b" (.id v))))
+
+  CalendarLiteral
+  (standardize [v]
+    (.getTime (.toGregorianCalendar (.unwrap v)))))
 
 (defn as-uri
   "Create a URI from a String"
