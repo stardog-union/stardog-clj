@@ -99,7 +99,7 @@ The test suite does run with the assumption there is a Stardog database server r
 
 ## License
 
-Copyright 2014, 2015, 2016, 2017, 2018, 2019, 2020 Stardog Union
+Copyright 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023 Stardog Union
 
 Copyright 2014 Paula Gearon
 
