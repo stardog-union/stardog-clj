@@ -15,14 +15,12 @@
 ;; limitations under the License.
 
 (ns stardog.core
-  (:require [clojure.string :as str]
-            [stardog.values :as values])
+  (:require [stardog.values :as values])
   (:import [com.complexible.stardog.api
             Connection ConnectionPool ConnectionPoolConfig ConnectionConfiguration
             Query ReadQuery]
            [clojure.lang IFn]
-           [java.util Map Iterator]
-           [com.complexible.stardog.reasoning.api ReasoningType]
+           [java.util Map List]
            [com.complexible.common.base CloseableIterator]
            [com.stardog.stark Values Namespace]
            [com.stardog.stark.query SelectQueryResult GraphQueryResult BindingSet Binding]
@@ -98,7 +96,7 @@
 
 (defn key-map-results
   "Converts a Iteration of bindings into a seq of keymaps."
-  [^IFn keyfn ^IFn valfn ^CloseableIterator results]
+  [^IFn keyfn ^IFn valfn ^SelectQueryResult results]
   (let [mapper (partial binding->map keyfn valfn)
         realized-results (into [] (map mapper) (iterator-seq results))
         variables (map keyfn (.variables results))]
@@ -193,7 +191,7 @@
                     (into {})))))
 
 (defn- order-results [results]
-  (let [{:keys [variables] :as metadata} (meta results)
+  (let [{:keys [^List variables] :as metadata} (meta results)
         order-result-set (fn [result-set]
                            (into (sorted-map-by (fn [binding1 binding2]
                                                   (compare
