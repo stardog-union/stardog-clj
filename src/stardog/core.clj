@@ -15,14 +15,12 @@
 ;; limitations under the License.
 
 (ns stardog.core
-  (:require [clojure.string :as str]
-            [stardog.values :as values])
+  (:require [stardog.values :as values])
   (:import [com.complexible.stardog.api
             Connection ConnectionPool ConnectionPoolConfig ConnectionConfiguration
             Query ReadQuery]
            [clojure.lang IFn]
-           [java.util Map Iterator]
-           [com.complexible.stardog.reasoning.api ReasoningType]
+           [java.util Map List]
            [com.complexible.common.base CloseableIterator]
            [com.stardog.stark Values Namespace]
            [com.stardog.stark.query SelectQueryResult GraphQueryResult BindingSet Binding]
@@ -98,11 +96,12 @@
 
 (defn key-map-results
   "Converts a Iteration of bindings into a seq of keymaps."
-  [^IFn keyfn ^IFn valfn ^CloseableIterator results]
+  [^IFn keyfn ^IFn valfn ^SelectQueryResult results]
   (let [mapper (partial binding->map keyfn valfn)
-        realized-results (into [] (map mapper) (iterator-seq results))]
+        realized-results (into [] (map mapper) (iterator-seq results))
+        variables (map keyfn (.variables results))]
     (.close results)
-    realized-results))
+    (vary-meta realized-results assoc :variables variables)))
 
 (defn vector-map-results
   "Converts a Graph of statements into a seq of vectors."
@@ -122,7 +121,7 @@
     (let [namespaces (into {}
                            (map (fn [^Namespace ns] [(.prefix ns) (.iri ns)]))
                            (iterator-seq (.. results namespaces iterator)))]
-      (with-meta (vector-map-results valfn results) {:namespaces namespaces})))
+      (vary-meta (vector-map-results valfn results) assoc :namespaces namespaces)))
   SelectQueryResult
   (clojure-data* [results keyfn valfn] (key-map-results keyfn valfn results))
   nil
@@ -191,6 +190,18 @@
                     (filter second)
                     (into {})))))
 
+(defn- order-results [results]
+  (let [{:keys [^List variables] :as metadata} (meta results)
+        order-result-set (fn [result-set]
+                           (into (sorted-map-by (fn [binding1 binding2]
+                                                  (compare
+                                                    (.indexOf variables binding1)
+                                                    (.indexOf variables binding2))))
+                                 result-set))]
+    (if (not-empty variables)
+      (-> (map order-result-set results)
+          (with-meta metadata))
+      results)))
 
 (defn query
   "Executes a query and returns results.
@@ -207,11 +218,13 @@
    - converter: A function to convert returned values with (Function).
    - key-converter: A function to convert returned binding names with (Function).
    - limit: The limit for the result. Must be present to use offset (integer).
-   - offset: The offset to start the result (integer)."
+   - offset: The offset to start the result (integer).
+   - ordered?: Preserve the order of the variable bindings present in the SELECT clause"
   [^Connection connection ^String text & args]
   (let [args (convert-to-map args)
         q (create-query #(.select connection text %) #(.select connection text) args)]
-    (execute* q args)))
+    (cond-> (execute* q args)
+      (get-in args [:parameters :ordered?]) (order-results))))
 
 
 (defn ask
